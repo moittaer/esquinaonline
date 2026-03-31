@@ -182,6 +182,30 @@ nav a:hover { color: var(--white); }
 .service-visual.v5 { background: linear-gradient(135deg,#e0f2fe,#d1fae5); }
 .service-visual-icon { font-size: 5rem; opacity: .14; font-family: var(--fd); font-weight: 900; letter-spacing: -.06em; user-select: none; }
 
+/* SERVICE VISUAL — imagem com parallax */
+.service-visual.has-img {
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+.svc-img-wrap {
+  /* ocupa 130% da altura do container: 15% extra em cima e embaixo p/ o parallax */
+  position: absolute;
+  left: 0; right: 0;
+  top: -15%;
+  height: 130%;
+  will-change: transform;
+}
+.svc-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
 /* PROCESS */
 #process { background: linear-gradient(160deg,#f0f9ff 0%,#faf5ff 40%,#fdf2f8 70%,#fffbeb 100%); color: var(--black); }
 #process .section-title { color: var(--black); }

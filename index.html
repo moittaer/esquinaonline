@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Esquina Digital — Estratégia & Mídia Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<header id="header">
+  <div class="logo"><a href="#"><img src="assets/logo.webp" alt="Esquina Digital" class="logo-img"></a></div>
+  <nav>
+    <a href="#services">Serviços</a>
+    <a href="#process">Processo</a>
+    <a href="#clients">Clientes</a>
+    <a href="#team">Equipe</a>
+  </nav>
+  <a href="#contact" class="btn-hire">Falar com a gente →</a>
+</header>
+
+<!-- 1. HERO -->
+<main>
+    <section class="hero" id="home">
+  <div class="gradient-blob"></div>
+  <div class="hero-inner">
+
+    <!-- Coluna esquerda: texto -->
+    <div class="hero-text">
+      <p class="hero-eyebrow">Que bom te ver aqui na Esquina Digital</p>
+      <h1 class="hero-headline">
+        <span class="hl-static">O lugar onde a Estratégia</span>
+        <span class="hl-swap" id="swapLine">
+          <span class="s-cur" id="sCur">&amp; Mídia Online</span>
+          <span class="s-nxt" id="sNxt"></span>
+        </span>
+        <span class="hl-static">se cruzam para gerar resultados.</span>
+      </h1>
+      <a href="#" class="btn-play">
+        <span class="play-icon"><svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg></span>
+        Esquina
+      </a>
+    </div>
+
+    <!-- Coluna direita: placeholder vídeo -->
+    <div class="hero-video-box">
+      <div class="hero-video-play" aria-label="Reproduzir vídeo da Hero">
+        <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
+      </div>
+      <span class="hero-video-label">Em breve</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- 2. SERVIÇOS -->
+<section class="section" id="services">
+  <div class="services-header">
+    <span class="section-label">O que fazemos</span>
+    <h2 class="section-title">Nossos Serviços</h2>
+  </div>
+  <div class="service-card">
+    <div class="service-content">
+      <h3 class="service-title-card">Mídia Digital</h3>
+      <p class="service-subtitle">Alcance, Engajamento e Conversão</p>
+      <div class="service-tags"><span class="tag">#Alcance</span><span class="tag">#Engajamento</span><span class="tag">#Meta Ads</span><span class="tag">#Google Ads</span><span class="tag">#Conversão</span></div>
+      <a href="#contact" class="btn-outline">Saiba mais →</a>
+    </div>
+    <div class="service-visual v1 has-img">
+      <div class="svc-img-wrap" data-parallax>
+        <img src="assets/midia.webp" alt="Mídia Digital" class="svc-img" loading="lazy">
+      </div>
+    </div>
+  </div>
+  <div class="service-card">
+    <div class="service-content">
+      <h3 class="service-title-card">Data-driven Dashboard</h3>
+      <p class="service-subtitle">Seus dados, suas decisões, em tempo real</p>
+      <div class="service-tags"><span class="tag">#Analytics</span><span class="tag">#Real-time</span><span class="tag">#Métricas</span><span class="tag">#Insights</span><span class="tag">#Performance</span></div>
+      <a href="#contact" class="btn-outline">Saiba mais →</a>
+    </div>
+    <div class="service-visual v2 has-img">
+      <div class="svc-img-wrap" data-parallax>
+        <img src="assets/dashboard.webp" alt="Data-driven Dashboard" class="svc-img" loading="lazy">
+      </div>
+    </div>
+  </div>
+  <div class="service-card">
+    <div class="service-content">
+      <h3 class="service-title-card">Planejamento Digital</h3>
+      <p class="service-subtitle">O caminho mais curto entre seu investimento e o resultado</p>
+      <div class="service-tags"><span class="tag">#Estratégia</span><span class="tag">#Roadmap</span><span class="tag">#Otimização</span><span class="tag">#Eficiência</span><span class="tag">#ROI</span></div>
+      <a href="#contact" class="btn-outline">Saiba mais →</a>
+    </div>
+    <div class="service-visual v3 has-img">
+      <div class="svc-img-wrap" data-parallax>
+        <img src="assets/planejamento.webp" alt="Planejamento Digital" class="svc-img" loading="lazy">
+      </div>
+    </div>
+  </div>
+  <div class="service-card">
+    <div class="service-content">
+      <h3 class="service-title-card">Vendas e Gestão de Leads</h3>
+      <p class="service-subtitle">Da captura à conversão, nenhum lead fica para trás</p>
+      <div class="service-tags"><span class="tag">#Leads</span><span class="tag">#Funil de Vendas</span><span class="tag">#CRM</span><span class="tag">#Nurturing</span><span class="tag">#Conversão</span></div>
+      <a href="#contact" class="btn-outline">Saiba mais →</a>
+    </div>
+    <div class="service-visual v4"><span class="service-visual-icon">CRM</span></div>
+  </div>
+  <div class="service-card">
+    <div class="service-content">
+      <h3 class="service-title-card">Desenvolvimento de Websites</h3>
+      <p class="service-subtitle">O alicerce digital do seu negócio</p>
+      <div class="service-tags"><span class="tag">#Website</span><span class="tag">#UX/UI</span><span class="tag">#Performance</span><span class="tag">#Mobile-first</span><span class="tag">#Conversão</span></div>
+      <a href="#contact" class="btn-outline">Saiba mais →</a>
+    </div>
+    <div class="service-visual v5 has-img">
+      <div class="svc-img-wrap" data-parallax>
+        <img src="assets/site.webp" alt="Desenvolvimento de Websites" class="svc-img" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. PROCESSO -->
+<section class="section" id="process">
+  <span class="section-label">Como trabalhamos</span>
+  <div class="process-layout">
+    <div>
+      <h2 class="process-tagline">Simples, claro e <em>orientado</em> a resultado.</h2>
+      <div class="process-steps">
+        <div class="process-step"><span class="step-num">01/</span><div class="step-text"><h3>Diagnóstico estratégico</h3></div></div>
+        <div class="process-step"><span class="step-num">02/</span><div class="step-text"><h3>Planejamento baseado em dados</h3></div></div>
+        <div class="process-step"><span class="step-num">03/</span><div class="step-text"><h3>Execução focada em performance</h3></div></div>
+        <div class="process-step"><span class="step-num">04/</span><div class="step-text"><h3>Análise, aprendizado e otimização contínua</h3></div></div>
+      </div>
+    </div>
+    <div class="process-cta-side">
+      <!-- Placeholder vídeo -->
+      <div class="process-video-box">
+        <div class="process-video-play" aria-label="Reproduzir vídeo de processo">
+          <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg>
+        </div>
+        <span class="process-video-label">Em breve</span>
+      </div>
+      <!-- Texto + CTA -->
+      <p class="process-cta-text">Cada etapa do nosso processo é pensada para eliminar desperdício e amplificar o que funciona — com dados reais, não achismos.</p>
+      <a href="#contact" class="btn-cta">Peça uma análise gratuita <span class="arrow-circle">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- 4. CLIENTES -->
+<section class="section" id="clients">
+  <span class="section-label">Quem confia no nosso trabalho</span>
+  <h2 class="section-title reveal">Nossos Clientes</h2>
+  <div class="carousel-track-wrap">
+    <div class="carousel-track">
+      <div class="client-logo"><img src="assets/prezunic.webp" alt="Prezunic"></div>
+      <div class="client-logo"><img src="assets/spd.webp" alt="SPD"></div>
+      <div class="client-logo"><img src="assets/villa.webp" alt="Villa"></div>
+      <div class="client-logo"><img src="assets/vumbora.webp" alt="Vumbora"></div>
+      <div class="client-logo"><img src="assets/99.webp" alt="99"></div>
+      <div class="client-logo"><img src="assets/bahia.webp" alt="Bahia"></div>
+      <div class="client-logo"><img src="assets/bambai.webp" alt="Bambai"></div>
+      <div class="client-logo"><img src="assets/barbosa.webp" alt="Barbosa"></div>
+      <div class="client-logo"><img src="assets/bequant.webp" alt="Bequant"></div>
+      <div class="client-logo"><img src="assets/braskem.webp" alt="Braskem"></div>
+      <div class="client-logo"><img src="assets/fied.webp" alt="Fied"></div>
+      <div class="client-logo"><img src="assets/ifood.webp" alt="iFood"></div>
+      <div class="client-logo"><img src="assets/olx.webp" alt="OLX"></div>
+      <!-- duplicate set for seamless loop -->
+      <div class="client-logo"><img src="assets/prezunic.webp" alt="Prezunic"></div>
+      <div class="client-logo"><img src="assets/spd.webp" alt="SPD"></div>
+      <div class="client-logo"><img src="assets/villa.webp" alt="Villa"></div>
+      <div class="client-logo"><img src="assets/vumbora.webp" alt="Vumbora"></div>
+      <div class="client-logo"><img src="assets/99.webp" alt="99"></div>
+      <div class="client-logo"><img src="assets/bahia.webp" alt="Bahia"></div>
+      <div class="client-logo"><img src="assets/bambai.webp" alt="Bambai"></div>
+      <div class="client-logo"><img src="assets/barbosa.webp" alt="Barbosa"></div>
+      <div class="client-logo"><img src="assets/bequant.webp" alt="Bequant"></div>
+      <div class="client-logo"><img src="assets/braskem.webp" alt="Braskem"></div>
+      <div class="client-logo"><img src="assets/fied.webp" alt="Fied"></div>
+      <div class="client-logo"><img src="assets/ifood.webp" alt="iFood"></div>
+      <div class="client-logo"><img src="assets/olx.webp" alt="OLX"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. LIDERANÇAS -->
+<section class="section" id="team">
+  <div class="team-header">
+    <div>
+      <span class="section-label">Conheça o time</span>
+      <h2 class="section-title">Nossas Lideranças</h2>
+      <p class="section-sub">Especialistas nas principais áreas do marketing digital.</p>
+    </div>
+    <ul class="team-checklist">
+      <li><span class="check-icon">✓</span>Mídia Online</li>
+      <li><span class="check-icon">✓</span>Planejamento Estratégico Digital</li>
+      <li><span class="check-icon">✓</span>Estudo de Tendências</li>
+      <li><span class="check-icon">✓</span>Inteligência Artificial</li>
+    </ul>
+  </div>
+  <div class="leader-carousel-wrap">
+    <div class="leader-track" id="leaderTrack">
+      <div class="leader-card">
+        <div class="leader-photo"><img src="assets/danilo.webp" alt="Danilo Pestana" loading="lazy"></div>
+        <div class="leader-info">
+          <span class="leader-role">CEO &amp; Estratégia</span>
+          <h3 class="leader-name">Danilo Pestana</h3>
+          <p class="leader-bio">Pesquisador e estrategista digital, une conteúdo,<br>dados e visão analítica.</p>
+        </div>
+      </div>
+      <div class="leader-card">
+        <div class="leader-photo"><img src="assets/ivna.webp" alt="Ivna Pires" loading="lazy"></div>
+        <div class="leader-info">
+          <span class="leader-role">Atendimento &amp; Estratégia</span>
+          <h3 class="leader-name">Ivna Pires</h3>
+          <p class="leader-bio">Comunicadora com olhar criativo e estratégico para relacionamento com os clientes.</p>
+        </div>
+      </div>
+      <div class="leader-card">
+        <div class="leader-photo"><img src="assets/bruno.webp" alt="Bruno Dantas" loading="lazy"></div>
+        <div class="leader-info">
+          <span class="leader-role">Análise &amp; Estratégia</span>
+          <h3 class="leader-name">Bruno Dantas</h3>
+          <p class="leader-bio">Publicitário com hiperfoco em gestão de tráfego, viciado em resultados.</p>
+        </div>
+      </div>
+      <div class="leader-card">
+        <div class="leader-photo"><img src="assets/dennis.webp" alt="Dennis Santos" loading="lazy"></div>
+        <div class="leader-info">
+          <span class="leader-role">Estatística &amp; Estratégia</span>
+          <h3 class="leader-name">Dennis Santos</h3>
+          <p class="leader-bio">Estatístico por formação, apaixonado por dados e marketing com propósito.</p>
+        </div>
+      </div>
+      <div class="leader-card">
+        <div class="leader-photo"><img src="assets/lucas.webp" alt="Lucas Moitinho" loading="lazy"></div>
+        <div class="leader-info">
+          <span class="leader-role">Análise &amp; Estratégia</span>
+          <h3 class="leader-name">Lucas Moitinho</h3>
+          <p class="leader-bio">Estrategista digital, analista de dados e dom de diretor de arte.</p>
+        </div>
+      </div>
+      <div class="leader-card">
+        <div class="leader-photo"><img src="assets/kevin.webp" alt="Kevin Lino" loading="lazy"></div>
+        <div class="leader-info">
+          <span class="leader-role">Produção Criativa &amp; IA</span>
+          <h3 class="leader-name">Kevin Lino</h3>
+          <p class="leader-bio">Especialista em criação de arte e produção com inteligência artificial.</p>
+        </div>
+      </div>
+      <div class="leader-card">
+        <div class="leader-photo"><img src="assets/julia.webp" alt="Julia Spadari" loading="lazy"></div>
+        <div class="leader-info">
+          <span class="leader-role">Gestão de Projetos &amp; Estratégia</span>
+          <h3 class="leader-name">Julia Spadari</h3>
+          <p class="leader-bio">Gerenciadora de projetos e estrategista focada em organização.</p>
+        </div>
+      </div>
+      <div class="leader-card">
+        <div class="leader-photo"><img src="assets/claudio.webp" alt="CláudIO" loading="lazy"></div>
+        <div class="leader-info">
+          <span class="leader-role">Agente IA</span>
+          <h3 class="leader-name">CláudIO</h3>
+          <p class="leader-bio">Analista incansável, especializado em dados, automação e otimização de estratégias.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="carousel-dots" id="leaderDots"></div>
+  <div class="carousel-controls">
+    <button class="ctrl-btn" id="leaderPrev">←</button>
+    <button class="ctrl-btn" id="leaderNext">→</button>
+  </div>
+</section>
+
+<!-- 6. CONTATO -->
+<section class="section" id="contact">
+  <div class="contact-inner">
+    <span class="section-label">Fale com a gente</span>
+    <h2 class="section-title">Quer entender por que seus resultados não estão vindo?</h2>
+    <p class="section-sub">Vamos analisar seu cenário e mostrar, com dados, onde estão os gargalos e oportunidades.</p>
+    <form class="contact-form" onsubmit="return false">
+      <div class="form-row">
+        <div class="form-group"><label for="nome">Nome completo</label><input type="text" id="nome" placeholder="Seu nome"></div>
+        <div class="form-group"><label for="tel">Telefone</label><input type="tel" id="tel" placeholder="(00) 00000-0000"></div>
+      </div>
+      <div class="form-group"><label for="email">E-mail</label><input type="email" id="email" placeholder="seu@email.com"></div>
+      <div class="form-group"><label for="msg">Mensagem</label><textarea id="msg" placeholder="Conte sobre seu negócio e seus desafios..."></textarea></div>
+      <button type="submit" class="btn-submit">Enviar</button>
+    </form>
+    <div class="wa-divider">
+      <p>Ou podemos conversar no WhatsApp</p>
+      <a href="https://api.whatsapp.com/send/?phone=5571997213410&text&type=phone_number&app_absent=0" class="btn-whatsapp" target="_blank" rel="noopener">
+        <svg class="wa-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="16" fill="#25D366"/>
+          <path d="M23.472 8.516A10.46 10.46 0 0 0 16.02 5.5C10.476 5.5 5.963 10.01 5.96 15.557c-.001 1.86.487 3.674 1.413 5.272L5.875 26.5l5.808-1.523a10.52 10.52 0 0 0 5.33 1.437h.005c5.543 0 10.057-4.511 10.059-10.059a10.002 10.002 0 0 0-2.605-7.839zm-7.452 15.47h-.004a8.733 8.733 0 0 1-4.454-1.22l-.32-.19-3.447.904.921-3.362-.208-.344a8.713 8.713 0 0 1-1.337-4.665c.002-4.813 3.921-8.729 8.737-8.729a8.674 8.674 0 0 1 6.18 2.562 8.663 8.663 0 0 1 2.555 6.175c-.002 4.814-3.92 8.869-8.623 8.869zm4.791-6.542c-.263-.131-1.555-.767-1.796-.854-.241-.088-.416-.131-.591.131-.175.263-.678.854-.831 1.03-.153.175-.306.197-.569.066-.263-.132-1.11-.409-2.114-1.304-.781-.696-1.309-1.556-1.462-1.819-.153-.263-.016-.405.115-.536.118-.117.263-.306.394-.459.131-.153.175-.263.263-.438.087-.175.044-.328-.022-.459-.066-.131-.591-1.425-.81-1.95-.213-.512-.43-.443-.591-.451l-.504-.009c-.175 0-.459.066-.7.328-.24.263-.919.898-.919 2.19 0 1.293.941 2.541 1.072 2.716.131.175 1.85 2.825 4.483 3.962.627.271 1.116.433 1.497.554.629.2 1.202.172 1.655.104.505-.075 1.555-.636 1.775-1.25.219-.613.219-1.138.153-1.248-.065-.11-.24-.175-.503-.306z" fill="white"/>
+        </svg>
+        Conversar pelo WhatsApp →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 7. FOOTER -->
+</main>
+    <footer>
+  <img src="assets/logo.webp" alt="Esquina Digital" class="footer-logo-img">
+  <nav class="footer-links">
+    <a href="#services">Serviços</a>
+    <a href="#process">Processo</a>
+    <a href="#clients">Clientes</a>
+    <a href="#team">Equipe</a>
+    <a href="#contact">Contato</a>
+  </nav>
+  <p class="footer-copy">© Esquina Digital 2026</p>
+</footer>
+
+<script src="main.js" defer></script>
+</body>
+</html>

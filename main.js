@@ -19,6 +19,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const blob = document.querySelector('.gradient-blob');
     let isTicking = false;
 
+    // 2a. Parallax nas imagens de serviço — translateY puro, sem scale CSS
+    const parallaxItems = Array.from(document.querySelectorAll('[data-parallax]'));
+
+    const updateServiceParallax = () => {
+        if (!parallaxItems.length) return;
+        const vH = window.innerHeight;
+        parallaxItems.forEach(wrap => {
+            const visual = wrap.closest('.service-visual');
+            const rect = visual.getBoundingClientRect();
+            // centro do card em relação ao centro da viewport, normalizado
+            const norm = Math.min(Math.max(
+                ((rect.top + rect.height / 2) - vH / 2) / vH, -0.6), 0.6
+            );
+            // ±18px — amplitude contida dentro do espaço extra de 15% do wrapper
+            const ty = norm * 18;
+            wrap.style.transform = `translateY(${ty.toFixed(2)}px)`;
+        });
+    };
+
     const onScroll = () => {
         // Toggle de transparência de Header
         if (window.scrollY > 40) {
@@ -32,8 +51,14 @@ document.addEventListener("DOMContentLoaded", () => {
             blob.style.transform = `translateY(calc(-50% + ${window.scrollY * 0.12}px))`;
         }
 
+        // Parallax das imagens de serviço
+        updateServiceParallax();
+
         isTicking = false;
     };
+
+    // Roda uma vez no carregamento para estado inicial correto
+    updateServiceParallax();
 
     window.addEventListener('scroll', () => {
         if (!isTicking) {
