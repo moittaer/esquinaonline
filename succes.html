@@ -1,1 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obrigado! — Esquina Digital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black:#0a0a0a; --white:#fff; --orange:#F97316; --od:#ea6c0a;
+    --g100:#f5f5f4; --g200:#e7e5e4; --g400:#a8a29e; --g800:#292524;
+    --violet:#8B5CF6; --pink:#EC4899; --teal:#4ECDC4; --amber:#F59E0B;
+    --fd:'Sora',sans-serif; --fb:'DM Sans',sans-serif;
+    --rb:100px;
+  }
 
+  html, body {
+    height: 100%;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--black);
+    color: var(--white);
+    overflow: hidden;
+    cursor: none;
+  }
+
+  /* CURSOR */
+  .cursor {
+    position: fixed; width: 22px; height: 22px; background: var(--orange);
+    border-radius: 50%; pointer-events: none; z-index: 99999;
+    transform: translate(-50%,-50%); transition: width .2s, height .2s, background .2s;
+  }
+  .cursor.hover { width: 52px; height: 52px; background: rgba(249,115,22,.3); border: 2px solid var(--orange); }
+
+  /* HEADER */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.25rem 2.5rem;
+    display: flex; align-items: center;
+  }
+  .logo-img { height: 32px; width: auto; display: block; }
+
+  /* BLOB */
+  .gradient-blob {
+    position: fixed;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 70vw; height: 70vw;
+    max-width: 800px; max-height: 800px;
+    background: linear-gradient(135deg, var(--teal), var(--violet), var(--pink), var(--amber));
+    filter: blur(110px);
+    opacity: .55;
+    border-radius: 50%;
+    animation: blobMorph 10s ease-in-out infinite;
+    pointer-events: none;
+    will-change: border-radius;
+    z-index: 0;
+  }
+  @keyframes blobMorph {
+    0%,100% { border-radius: 50%; }
+    25%     { border-radius: 60% 40% 55% 45% / 45% 55% 40% 60%; }
+    50%     { border-radius: 40% 60% 45% 55% / 55% 45% 60% 40%; }
+    75%     { border-radius: 55% 45% 60% 40% / 40% 60% 45% 55%; }
+  }
+
+  /* LAYOUT CENTRAL */
+  .page {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem;
+  }
+
+  /* CARD */
+  .card {
+    background: rgba(10,10,10,.72);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 28px;
+    padding: clamp(2.5rem, 6vw, 4.5rem) clamp(2rem, 6vw, 5rem);
+    text-align: center;
+    max-width: 540px;
+    width: 100%;
+    /* entrada */
+    opacity: 0;
+    transform: translateY(32px) scale(.97);
+    animation: cardIn .75s cubic-bezier(.22,1,.36,1) .25s forwards;
+  }
+  @keyframes cardIn {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ÍCONE CHECK */
+  .check-wrap {
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 2rem;
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--violet));
+    opacity: 0;
+    animation: popIn .5s cubic-bezier(.34,1.56,.64,1) .9s forwards;
+  }
+  @keyframes popIn {
+    to { opacity: 1; }
+  }
+  .check-wrap svg {
+    width: 34px; height: 34px;
+    stroke: #fff; stroke-width: 2.5;
+    stroke-linecap: round; stroke-linejoin: round;
+    fill: none;
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    animation: drawCheck .45s ease .95s forwards;
+  }
+  @keyframes drawCheck {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* TEXTOS */
+  .card-title {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -.04em;
+    line-height: 1.1;
+    margin-bottom: .75rem;
+    opacity: 0;
+    animation: fadeUp .55s ease .7s forwards;
+  }
+  .card-title em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--orange), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .card-sub {
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: rgba(255,255,255,.65);
+    line-height: 1.6;
+    margin-bottom: 2.25rem;
+    opacity: 0;
+    animation: fadeUp .55s ease .85s forwards;
+  }
+
+  /* BOTÃO */
+  .btn-back {
+    display: inline-flex; align-items: center; gap: .4rem;
+    font-family: 'Sora', sans-serif;
+    font-size: .9rem;
+    font-weight: 600;
+    background: var(--orange);
+    color: var(--white);
+    border: none;
+    border-radius: var(--rb);
+    padding: .7rem 1.6rem;
+    text-decoration: none;
+    cursor: none;
+    transition: background .2s, gap .2s, transform .2s;
+    opacity: 0;
+    animation: fadeUp .55s ease 1.05s forwards;
+  }
+  .btn-back:hover { background: var(--od); gap: .65rem; transform: translateY(-2px); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* PARTÍCULAS DECORATIVAS */
+  .dot {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: .18;
+    animation: floatDot linear infinite;
+  }
+  @keyframes floatDot {
+    0%   { transform: translateY(0)   rotate(0deg); }
+    100% { transform: translateY(-100vh) rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<header>
+  <a href="index.html">
+    <img src="assets/logo.webp" alt="Esquina Digital" class="logo-img">
+  </a>
+</header>
+
+<div class="gradient-blob"></div>
+
+<!-- Partículas -->
+<div class="dot" style="width:8px;height:8px;background:var(--orange);left:12%;bottom:-20px;animation-duration:14s;animation-delay:0s"></div>
+<div class="dot" style="width:5px;height:5px;background:var(--violet);left:30%;bottom:-20px;animation-duration:18s;animation-delay:3s"></div>
+<div class="dot" style="width:10px;height:10px;background:var(--teal);left:55%;bottom:-20px;animation-duration:12s;animation-delay:1.5s"></div>
+<div class="dot" style="width:6px;height:6px;background:var(--pink);left:72%;bottom:-20px;animation-duration:20s;animation-delay:5s"></div>
+<div class="dot" style="width:7px;height:7px;background:var(--amber);left:88%;bottom:-20px;animation-duration:16s;animation-delay:2s"></div>
+
+<div class="page">
+  <div class="card">
+
+    <div class="check-wrap">
+      <svg viewBox="0 0 24 24">
+        <polyline points="4 12 9 17 20 6"/>
+      </svg>
+    </div>
+
+    <h1 class="card-title">Muito <em>obrigado!</em></h1>
+    <p class="card-sub">Seu formulário foi recebido,<br>em breve entraremos em contato! ;)</p>
+
+    <a href="index.html" class="btn-back">← Volte para nosso site</a>
+
+  </div>
+</div>
+
+<script>
+  // Cursor customizado
+  const cursor = document.getElementById('cursor');
+  if (cursor && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top  = e.clientY + 'px';
+    });
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+  }
+</script>
+</body>
+</html>
