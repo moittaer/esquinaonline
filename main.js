@@ -19,23 +19,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const blob = document.querySelector('.gradient-blob');
     let isTicking = false;
 
-    // 2a. Parallax nas imagens de serviço — translateY puro, sem scale CSS
+    // 2a. Parallax elegante nas imagens de serviço — scale + translateY suave
     const parallaxItems = Array.from(document.querySelectorAll('[data-parallax]'));
+
+    // Estado atual interpolado por cartão (lerp para suavidade extra)
+    const parallaxState = parallaxItems.map(() => ({ cur: 0, target: 0 }));
+    let rafId = null;
+    let isParallaxRunning = false;
+
+    const calcTargets = () => {
+        const vH = window.innerHeight;
+        parallaxItems.forEach((wrap, i) => {
+            const visual = wrap.closest('.service-visual');
+            if (!visual) return;
+            const rect = visual.getBoundingClientRect();
+            // Progresso: -1 (card acima da viewport) → +1 (card abaixo)
+            const progress = ((rect.top + rect.height / 2) - vH / 2) / (vH * 0.7);
+            const clamped = Math.min(Math.max(progress, -1), 1);
+            // ±14px de deslocamento dentro da margem de scale(1.20)
+            parallaxState[i].target = clamped * 14;
+        });
+    };
+
+    const applyParallax = () => {
+        let stillMoving = false;
+        parallaxState.forEach((state, i) => {
+            // Lerp: suaviza a transição (fator 0.08 = muito fluido)
+            state.cur += (state.target - state.cur) * 0.08;
+            if (Math.abs(state.target - state.cur) > 0.05) stillMoving = true;
+            // scale(1.20) constante + translateY variável
+            parallaxItems[i].style.transform = `scale(1.20) translateY(${state.cur.toFixed(3)}px)`;
+        });
+        if (stillMoving) {
+            rafId = requestAnimationFrame(applyParallax);
+        } else {
+            isParallaxRunning = false;
+        }
+    };
 
     const updateServiceParallax = () => {
         if (!parallaxItems.length) return;
-        const vH = window.innerHeight;
-        parallaxItems.forEach(wrap => {
-            const visual = wrap.closest('.service-visual');
-            const rect = visual.getBoundingClientRect();
-            // centro do card em relação ao centro da viewport, normalizado
-            const norm = Math.min(Math.max(
-                ((rect.top + rect.height / 2) - vH / 2) / vH, -0.6), 0.6
-            );
-            // ±18px — amplitude contida dentro do espaço extra de 15% do wrapper
-            const ty = norm * 18;
-            wrap.style.transform = `translateY(${ty.toFixed(2)}px)`;
-        });
+        calcTargets();
+        if (!isParallaxRunning) {
+            isParallaxRunning = true;
+            rafId = requestAnimationFrame(applyParallax);
+        }
     };
 
     const onScroll = () => {

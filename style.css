@@ -182,19 +182,22 @@ nav a:hover { color: var(--white); }
 .service-visual.v5 { background: linear-gradient(135deg,#e0f2fe,#d1fae5); }
 .service-visual-icon { font-size: 5rem; opacity: .14; font-family: var(--fd); font-weight: 900; letter-spacing: -.06em; user-select: none; }
 
-/* SERVICE VISUAL — imagem com parallax */
+/* SERVICE VISUAL — imagem com parallax suave */
 .service-visual.has-img {
   padding: 0;
   position: relative;
   overflow: hidden;
+  background: transparent;
 }
+/* wrapper interno: 20% maior para dar margem ao parallax */
 .svc-img-wrap {
-  /* ocupa 130% da altura do container: 15% extra em cima e embaixo p/ o parallax */
   position: absolute;
-  left: 0; right: 0;
-  top: -15%;
-  height: 130%;
+  inset: 0;
   will-change: transform;
+  transform-origin: center center;
+  /* scale(1.20) garante que a imagem jamais mostre bordas vazias com ±10% de movimento */
+  transform: scale(1.20);
+  transition: transform 0.1s linear;
 }
 .svc-img {
   width: 100%;
@@ -204,6 +207,7 @@ nav a:hover { color: var(--white); }
   display: block;
   pointer-events: none;
   user-select: none;
+  border-radius: inherit;
 }
 
 /* PROCESS */
