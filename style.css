@@ -62,8 +62,8 @@ nav a:hover { color: var(--white); }
   border-radius: 50%;
   animation: blobMorph 10s ease-in-out infinite;
   pointer-events: none;
-  contain: strict;
-  will-change: transform, border-radius;
+  contain: layout style;  /* strict bloquearia o filter; layout+style já isola o reflow */
+  will-change: border-radius; /* transform já está no JS, não duplicar aqui */
 }
 @keyframes blobMorph {
   0%,100% { border-radius: 50%; }
@@ -197,7 +197,7 @@ nav a:hover { color: var(--white); }
   transform-origin: center center;
   /* scale(1.20) garante que a imagem jamais mostre bordas vazias com ±10% de movimento */
   transform: scale(1.20);
-  transition: transform 0.1s linear;
+  /* sem transition aqui: o JS lerp cuida da suavidade, CSS transition conflitaria */
 }
 .svc-img {
   width: 100%;

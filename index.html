@@ -3,10 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Esquina Digital — Agência de Estratégia & Mídia Online. Mídia digital, dashboards, planejamento e performance com dados reais.">
 <title>Esquina Digital — Estratégia & Mídia Online</title>
+<!-- Preload do logo: recurso acima do fold, carrega antes do LCP -->
+<link rel="preload" href="assets/logo.webp" as="image" type="image/webp">
+<!-- Fonts: apenas os pesos usados + display=swap evita FOIT -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,7 +18,7 @@
 <div class="cursor" id="cursor"></div>
 
 <header id="header">
-  <div class="logo"><a href="#"><img src="assets/logo.webp" alt="Esquina Digital" class="logo-img"></a></div>
+  <div class="logo"><a href="#"><img src="assets/logo.webp" alt="Esquina Digital" class="logo-img" loading="eager" fetchpriority="high" width="120" height="32"></a></div>
   <nav>
     <a href="#services">Serviços</a>
     <a href="#process">Processo</a>
@@ -73,7 +77,7 @@
     </div>
     <div class="service-visual v1 has-img">
       <div class="svc-img-wrap" data-parallax>
-        <img src="assets/midia.webp" alt="Mídia Digital" class="svc-img" loading="lazy">
+        <img src="assets/midia.webp" alt="Mídia Digital" class="svc-img" loading="lazy" width="960" height="520">
       </div>
     </div>
   </div>
@@ -86,7 +90,7 @@
     </div>
     <div class="service-visual v2 has-img">
       <div class="svc-img-wrap" data-parallax>
-        <img src="assets/dashboard.webp" alt="Data-driven Dashboard" class="svc-img" loading="lazy">
+        <img src="assets/dashboard.webp" alt="Data-driven Dashboard" class="svc-img" loading="lazy" width="960" height="520">
       </div>
     </div>
   </div>
@@ -99,7 +103,7 @@
     </div>
     <div class="service-visual v3 has-img">
       <div class="svc-img-wrap" data-parallax>
-        <img src="assets/planejamento.webp" alt="Planejamento Digital" class="svc-img" loading="lazy">
+        <img src="assets/planejamento.webp" alt="Planejamento Digital" class="svc-img" loading="lazy" width="960" height="520">
       </div>
     </div>
   </div>
@@ -112,7 +116,7 @@
     </div>
     <div class="service-visual v4 has-img">
       <div class="svc-img-wrap" data-parallax>
-        <img src="assets/vendas.webp" alt="Vendas e Gestão de Leads" class="svc-img" loading="lazy">
+        <img src="assets/vendas.webp" alt="Vendas e Gestão de Leads" class="svc-img" loading="lazy" width="960" height="520">
       </div>
     </div>
   </div>
@@ -125,7 +129,7 @@
     </div>
     <div class="service-visual v5 has-img">
       <div class="svc-img-wrap" data-parallax>
-        <img src="assets/site.webp" alt="Desenvolvimento de Websites" class="svc-img" loading="lazy">
+        <img src="assets/site.webp" alt="Desenvolvimento de Websites" class="svc-img" loading="lazy" width="960" height="520">
       </div>
     </div>
   </div>
@@ -165,33 +169,33 @@
   <h2 class="section-title reveal">Nossos Clientes</h2>
   <div class="carousel-track-wrap">
     <div class="carousel-track">
-      <div class="client-logo"><img src="assets/prezunic.webp" alt="Prezunic"></div>
-      <div class="client-logo"><img src="assets/spd.webp" alt="SPD"></div>
-      <div class="client-logo"><img src="assets/villa.webp" alt="Villa"></div>
-      <div class="client-logo"><img src="assets/vumbora.webp" alt="Vumbora"></div>
-      <div class="client-logo"><img src="assets/99.webp" alt="99"></div>
-      <div class="client-logo"><img src="assets/bahia.webp" alt="Bahia"></div>
-      <div class="client-logo"><img src="assets/bambai.webp" alt="Bambai"></div>
-      <div class="client-logo"><img src="assets/barbosa.webp" alt="Barbosa"></div>
-      <div class="client-logo"><img src="assets/bequant.webp" alt="Bequant"></div>
-      <div class="client-logo"><img src="assets/braskem.webp" alt="Braskem"></div>
-      <div class="client-logo"><img src="assets/fied.webp" alt="Fied"></div>
-      <div class="client-logo"><img src="assets/ifood.webp" alt="iFood"></div>
-      <div class="client-logo"><img src="assets/olx.webp" alt="OLX"></div>
+      <div class="client-logo"><img src="assets/prezunic.webp" alt="Prezunic" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/spd.webp" alt="SPD" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/villa.webp" alt="Villa" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/vumbora.webp" alt="Vumbora" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/99.webp" alt="99" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/bahia.webp" alt="Bahia" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/bambai.webp" alt="Bambai" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/barbosa.webp" alt="Barbosa" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/bequant.webp" alt="Bequant" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/braskem.webp" alt="Braskem" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/fied.webp" alt="Fied" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/ifood.webp" alt="iFood" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/olx.webp" alt="OLX" loading="lazy" width="120" height="50"></div>
       <!-- duplicate set for seamless loop -->
-      <div class="client-logo"><img src="assets/prezunic.webp" alt="Prezunic"></div>
-      <div class="client-logo"><img src="assets/spd.webp" alt="SPD"></div>
-      <div class="client-logo"><img src="assets/villa.webp" alt="Villa"></div>
-      <div class="client-logo"><img src="assets/vumbora.webp" alt="Vumbora"></div>
-      <div class="client-logo"><img src="assets/99.webp" alt="99"></div>
-      <div class="client-logo"><img src="assets/bahia.webp" alt="Bahia"></div>
-      <div class="client-logo"><img src="assets/bambai.webp" alt="Bambai"></div>
-      <div class="client-logo"><img src="assets/barbosa.webp" alt="Barbosa"></div>
-      <div class="client-logo"><img src="assets/bequant.webp" alt="Bequant"></div>
-      <div class="client-logo"><img src="assets/braskem.webp" alt="Braskem"></div>
-      <div class="client-logo"><img src="assets/fied.webp" alt="Fied"></div>
-      <div class="client-logo"><img src="assets/ifood.webp" alt="iFood"></div>
-      <div class="client-logo"><img src="assets/olx.webp" alt="OLX"></div>
+      <div class="client-logo"><img src="assets/prezunic.webp" alt="Prezunic" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/spd.webp" alt="SPD" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/villa.webp" alt="Villa" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/vumbora.webp" alt="Vumbora" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/99.webp" alt="99" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/bahia.webp" alt="Bahia" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/bambai.webp" alt="Bambai" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/barbosa.webp" alt="Barbosa" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/bequant.webp" alt="Bequant" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/braskem.webp" alt="Braskem" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/fied.webp" alt="Fied" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/ifood.webp" alt="iFood" loading="lazy" width="120" height="50"></div>
+      <div class="client-logo"><img src="assets/olx.webp" alt="OLX" loading="lazy" width="120" height="50"></div>
     </div>
   </div>
 </section>
@@ -214,7 +218,7 @@
   <div class="leader-carousel-wrap">
     <div class="leader-track" id="leaderTrack">
       <div class="leader-card">
-        <div class="leader-photo"><img src="assets/danilo.webp" alt="Danilo Pestana" loading="lazy"></div>
+        <div class="leader-photo"><img src="assets/danilo.webp" alt="Danilo Pestana" loading="lazy" width="160" height="240"></div>
         <div class="leader-info">
           <span class="leader-role">CEO &amp; Estratégia</span>
           <h3 class="leader-name">Danilo Pestana</h3>
@@ -222,7 +226,7 @@
         </div>
       </div>
       <div class="leader-card">
-        <div class="leader-photo"><img src="assets/ivna.webp" alt="Ivna Pires" loading="lazy"></div>
+        <div class="leader-photo"><img src="assets/ivna.webp" alt="Ivna Pires" loading="lazy" width="160" height="240"></div>
         <div class="leader-info">
           <span class="leader-role">Atendimento &amp; Estratégia</span>
           <h3 class="leader-name">Ivna Pires</h3>
@@ -230,7 +234,7 @@
         </div>
       </div>
       <div class="leader-card">
-        <div class="leader-photo"><img src="assets/bruno.webp" alt="Bruno Dantas" loading="lazy"></div>
+        <div class="leader-photo"><img src="assets/bruno.webp" alt="Bruno Dantas" loading="lazy" width="160" height="240"></div>
         <div class="leader-info">
           <span class="leader-role">Análise &amp; Estratégia</span>
           <h3 class="leader-name">Bruno Dantas</h3>
@@ -238,7 +242,7 @@
         </div>
       </div>
       <div class="leader-card">
-        <div class="leader-photo"><img src="assets/dennis.webp" alt="Dennis Santos" loading="lazy"></div>
+        <div class="leader-photo"><img src="assets/dennis.webp" alt="Dennis Santos" loading="lazy" width="160" height="240"></div>
         <div class="leader-info">
           <span class="leader-role">Estatística &amp; Estratégia</span>
           <h3 class="leader-name">Dennis Santos</h3>
@@ -246,7 +250,7 @@
         </div>
       </div>
       <div class="leader-card">
-        <div class="leader-photo"><img src="assets/lucas.webp" alt="Lucas Moitinho" loading="lazy"></div>
+        <div class="leader-photo"><img src="assets/lucas.webp" alt="Lucas Moitinho" loading="lazy" width="160" height="240"></div>
         <div class="leader-info">
           <span class="leader-role">Análise &amp; Estratégia</span>
           <h3 class="leader-name">Lucas Moitinho</h3>
@@ -254,7 +258,7 @@
         </div>
       </div>
       <div class="leader-card">
-        <div class="leader-photo"><img src="assets/kevin.webp" alt="Kevin Lino" loading="lazy"></div>
+        <div class="leader-photo"><img src="assets/kevin.webp" alt="Kevin Lino" loading="lazy" width="160" height="240"></div>
         <div class="leader-info">
           <span class="leader-role">Produção Criativa &amp; IA</span>
           <h3 class="leader-name">Kevin Lino</h3>
@@ -262,7 +266,7 @@
         </div>
       </div>
       <div class="leader-card">
-        <div class="leader-photo"><img src="assets/julia.webp" alt="Julia Spadari" loading="lazy"></div>
+        <div class="leader-photo"><img src="assets/julia.webp" alt="Julia Spadari" loading="lazy" width="160" height="240"></div>
         <div class="leader-info">
           <span class="leader-role">Gestão de Projetos &amp; Estratégia</span>
           <h3 class="leader-name">Julia Spadari</h3>
@@ -270,7 +274,7 @@
         </div>
       </div>
       <div class="leader-card">
-        <div class="leader-photo"><img src="assets/claudio.webp" alt="CláudIO" loading="lazy"></div>
+        <div class="leader-photo"><img src="assets/claudio.webp" alt="CláudIO" loading="lazy" width="160" height="240"></div>
         <div class="leader-info">
           <span class="leader-role">Agente IA</span>
           <h3 class="leader-name">CláudIO</h3>
@@ -319,7 +323,7 @@
 <!-- 7. FOOTER -->
 </main>
     <footer>
-  <img src="assets/logo.webp" alt="Esquina Digital" class="footer-logo-img">
+  <img src="assets/logo.webp" alt="Esquina Digital" class="footer-logo-img" loading="lazy" width="105" height="28">
   <nav class="footer-links">
     <a href="#services">Serviços</a>
     <a href="#process">Processo</a>
