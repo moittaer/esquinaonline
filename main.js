@@ -1,5 +1,5 @@
 /* ============================================================
-   PAGE LOADER — Logo Fill Animation + Glass Card
+   PAGE LOADER — Logo Fill · Nós Neurais · Frases de Etapa
    ============================================================ */
 (function initLoader() {
 
@@ -8,27 +8,28 @@
     const bgCanvas   = document.getElementById('loaderBg');
     const logoCanvas = document.getElementById('loaderLogoCanvas');
     const pctEl      = document.getElementById('loaderPct');
+    const phraseEl   = document.getElementById('loaderPhrase');
     if (!wrap || !logoCanvas) return;
-    startLoader(wrap, bgCanvas, logoCanvas, pctEl);
+    startLoader(wrap, bgCanvas, logoCanvas, pctEl, phraseEl);
   }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', run);
   } else { run(); }
 
-  /* ============================================================ */
-  function startLoader(wrap, bgCanvas, logoCanvas, pctEl) {
+  /* ================================================================ */
+  function startLoader(wrap, bgCanvas, logoCanvas, pctEl, phraseEl) {
 
     document.body.classList.add('loader-active');
 
-    /* ── Progresso global (0 → 1) ── */
+    /* ── Progresso (0→1) ── */
     let progress  = 0;
     let loadDone  = false;
     let dismissed = false;
     let rafId;
 
     const START_TIME   = performance.now();
-    const MIN_DURATION = 2400;
+    const MIN_DURATION = 2800;   /* mínimo 2.8 s para dar tempo de ver a animação */
 
     let browserProg = 0;
     document.addEventListener('DOMContentLoaded', () => { browserProg = Math.max(browserProg, 0.55); });
@@ -40,29 +41,81 @@
     function calcProgress(now) {
       const elapsed  = now - START_TIME;
       const timeFrac = Math.min(elapsed / MIN_DURATION, 1);
-      const timeProg = easeOut(timeFrac) * (loadDone ? 1 : 0.85);
-      const target   = Math.max(timeProg, browserProg * (loadDone ? 1 : 0.8));
-      progress = Math.min(1, Math.max(progress, lerp(progress, target, 0.045)));
+      const timeProg = easeOut(timeFrac) * (loadDone ? 1 : 0.82);
+      const target   = Math.max(timeProg, browserProg * (loadDone ? 1 : 0.78));
+      progress = Math.min(1, Math.max(progress, lerp(progress, target, 0.035)));
     }
 
-    /* ── Background canvas — partículas leves ── */
-    let bgW, bgH, bgDpr;
+    /* ── Frases de etapa ── */
+    const PHRASES = [
+      'Começamos aqui',
+      'Aguarde enquanto conectamos os pontos',
+      'Mapeando as possibilidades',
+      'Agora é só virar na primeira Esquina',
+    ];
+    let currentPhrase = -1;
+
+    function updatePhrase(p) {
+      const idx = p < 0.26 ? 0 : p < 0.54 ? 1 : p < 0.80 ? 2 : 3;
+      if (idx === currentPhrase) return;
+      currentPhrase = idx;
+      if (!phraseEl) return;
+
+      phraseEl.classList.remove('phrase-in');
+      phraseEl.classList.add('phrase-out');
+
+      setTimeout(() => {
+        phraseEl.textContent = PHRASES[idx];
+        phraseEl.classList.remove('phrase-out');
+        void phraseEl.offsetWidth;   /* força reflow */
+        phraseEl.classList.add('phrase-in');
+      }, 480);
+    }
+
+    /* Primeira frase imediata */
+    if (phraseEl) {
+      phraseEl.textContent = PHRASES[0];
+      phraseEl.classList.add('phrase-in');
+      currentPhrase = 0;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       BACKGROUND — Nós neurais
+       • Desconectados no início
+       • Conexões aparecem progressivamente conforme progress sobe
+    ════════════════════════════════════════════════════════════ */
     const bgCtx = bgCanvas ? bgCanvas.getContext('2d') : null;
-    const PARTICLES = Array.from({ length: 55 }, () => ({
-      x: Math.random(), y: Math.random(),
-      vx: (Math.random() - .5) * .00018,
-      vy: (Math.random() - .5) * .00018,
-      r: .5 + Math.random() * 1.2,
-      a: .04 + Math.random() * .09,
+    let bgW, bgH, bgDpr;
+
+    /* 48 nós espalhados pela tela */
+    const N_COUNT = 48;
+    const nodes = Array.from({ length: N_COUNT }, () => ({
+      x  : Math.random(),
+      y  : Math.random(),
+      vx : (Math.random() - .5) * 0.00014,
+      vy : (Math.random() - .5) * 0.00014,
+      r  : 1.6 + Math.random() * 2.4,
+      a  : 0.22 + Math.random() * 0.38,
     }));
-    const EDGES_BG = [];
-    for (let i = 0; i < PARTICLES.length; i++)
-      for (let j = i + 1; j < PARTICLES.length; j++)
-        if (Math.hypot(PARTICLES[i].x - PARTICLES[j].x, PARTICLES[i].y - PARTICLES[j].y) < .18)
-          EDGES_BG.push([i, j]);
+
+    /* Pré-computa arestas candidatas */
+    const EDGE_DIST = 0.195;
+    const edges = [];
+    for (let i = 0; i < N_COUNT; i++) {
+      for (let j = i + 1; j < N_COUNT; j++) {
+        const dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+        if (dist < EDGE_DIST) {
+          edges.push({
+            i, j, dist,
+            threshold: 0.04 + Math.random() * 0.94,   /* aparece quando progress > threshold */
+            drawProg : 0,
+          });
+        }
+      }
+    }
 
     function resizeBg() {
-      if (!bgCanvas) return;
+      if (!bgCanvas || !bgCtx) return;
       bgDpr = window.devicePixelRatio || 1;
       bgW = window.innerWidth; bgH = window.innerHeight;
       bgCanvas.width  = bgW * bgDpr; bgCanvas.height = bgH * bgDpr;
@@ -76,65 +129,116 @@
       if (!bgCtx) return;
       bgCtx.clearRect(0, 0, bgW, bgH);
 
-      const grd = bgCtx.createRadialGradient(bgW/2, bgH/2, 0, bgW/2, bgH/2, Math.max(bgW, bgH) * .55);
-      grd.addColorStop(0,   'rgba(139,92,246,.07)');
-      grd.addColorStop(.6,  'rgba(139,92,246,.02)');
+      /* Glow central sutil */
+      const grd = bgCtx.createRadialGradient(bgW/2, bgH/2, 0, bgW/2, bgH/2, Math.max(bgW,bgH)*.55);
+      grd.addColorStop(0,   'rgba(139,92,246,.055)');
+      grd.addColorStop(.6,  'rgba(139,92,246,.012)');
       grd.addColorStop(1,   'rgba(0,0,0,0)');
       bgCtx.fillStyle = grd;
       bgCtx.fillRect(0, 0, bgW, bgH);
 
-      PARTICLES.forEach(p => {
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < 0) p.x = 1; if (p.x > 1) p.x = 0;
-        if (p.y < 0) p.y = 1; if (p.y > 1) p.y = 0;
+      /* Move nós (wrap around) */
+      nodes.forEach(n => {
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0) n.x += 1; if (n.x > 1) n.x -= 1;
+        if (n.y < 0) n.y += 1; if (n.y > 1) n.y -= 1;
       });
 
-      EDGES_BG.forEach(([i, j]) => {
-        const a = PARTICLES[i], b = PARTICLES[j];
-        const dist = Math.hypot(a.x - b.x, a.y - b.y);
-        const alpha = (1 - dist / .18) * .08;
-        bgCtx.strokeStyle = `rgba(139,92,246,${alpha})`;
-        bgCtx.lineWidth   = .6;
+      /* Atualiza drawProg suavemente */
+      edges.forEach(e => {
+        const target = progress > e.threshold ? 1 : 0;
+        e.drawProg = lerp(e.drawProg, target, 0.025);
+      });
+
+      /* Desenha arestas */
+      edges.forEach(e => {
+        if (e.drawProg < 0.01) return;
+        const a = nodes[e.i], b = nodes[e.j];
+        const ax = a.x * bgW, ay = a.y * bgH;
+        const bx = b.x * bgW, by = b.y * bgH;
+
+        /* Ponta da linha animada */
+        const ex = ax + (bx - ax) * e.drawProg;
+        const ey = ay + (by - ay) * e.drawProg;
+
+        const fade  = 1 - e.dist / EDGE_DIST;
+        const alpha = e.drawProg * fade * 0.20;
+
+        const grad = bgCtx.createLinearGradient(ax, ay, ex, ey);
+        grad.addColorStop(0, `rgba(200,185,255,${alpha * .55})`);
+        grad.addColorStop(1, `rgba(139,92,246,${alpha})`);
+
+        bgCtx.save();
+        if (e.drawProg < 0.97) {
+          bgCtx.shadowColor = 'rgba(167,139,250,.45)';
+          bgCtx.shadowBlur  = 5;
+        }
+        bgCtx.strokeStyle = grad;
+        bgCtx.lineWidth   = 0.7;
+        bgCtx.lineCap     = 'round';
         bgCtx.beginPath();
-        bgCtx.moveTo(a.x * bgW, a.y * bgH);
-        bgCtx.lineTo(b.x * bgW, b.y * bgH);
+        bgCtx.moveTo(ax, ay);
+        bgCtx.lineTo(ex, ey);
         bgCtx.stroke();
+        bgCtx.restore();
       });
 
-      PARTICLES.forEach(p => {
-        bgCtx.fillStyle = `rgba(167,139,250,${p.a})`;
+      /* Desenha nós */
+      nodes.forEach(n => {
+        const nx = n.x * bgW, ny = n.y * bgH;
+
+        bgCtx.save();
         bgCtx.beginPath();
-        bgCtx.arc(p.x * bgW, p.y * bgH, p.r, 0, Math.PI * 2);
+        bgCtx.arc(nx, ny, n.r + 3, 0, Math.PI * 2);
+        bgCtx.fillStyle = `rgba(139,92,246,${n.a * 0.15})`;
         bgCtx.fill();
+        bgCtx.restore();
+
+        bgCtx.save();
+        bgCtx.shadowColor = 'rgba(167,139,250,.65)';
+        bgCtx.shadowBlur  = 7;
+        bgCtx.fillStyle   = `rgba(210,195,255,${n.a})`;
+        bgCtx.beginPath();
+        bgCtx.arc(nx, ny, n.r, 0, Math.PI * 2);
+        bgCtx.fill();
+        bgCtx.restore();
       });
     }
 
-    /* ── Logo canvas — fill animation ── */
+    /* ════════════════════════════════════════════════════════════
+       LOGO — preenchimento da forma esquerda → direita
+       Cor: branca em todo o percurso (sem virar roxa)
+    ════════════════════════════════════════════════════════════ */
     const lCtx    = logoCanvas.getContext('2d');
     const logoImg = new Image();
     let logoLoaded = false;
     let lW, lH, lDpr;
+    let maskCanvas = null;
     const LOGO_ASPECT = 1293 / 327;
 
     function resizeLogo() {
       lDpr = window.devicePixelRatio || 1;
+      /* Calcula a largura disponível dentro do card */
       const cardEl = wrap.querySelector('.loader-card');
-      const cardW  = cardEl ? cardEl.clientWidth - 128 : Math.min(window.innerWidth * .75, 420);
-      lW = Math.round(Math.min(cardW, 420));
+      let availW;
+      if (cardEl && cardEl.clientWidth > 0) {
+        /* padding: 64px cada lado → subtrai 128px */
+        availW = cardEl.clientWidth - 128;
+      } else {
+        availW = Math.min(window.innerWidth * .80, 372);
+      }
+      lW = Math.round(Math.max(200, Math.min(availW, 372)));
       lH = Math.round(lW / LOGO_ASPECT);
       logoCanvas.width  = lW * lDpr;
       logoCanvas.height = lH * lDpr;
       logoCanvas.style.width  = lW + 'px';
       logoCanvas.style.height = lH + 'px';
       lCtx.setTransform(lDpr, 0, 0, lDpr, 0, 0);
+      if (maskCanvas && logoLoaded) buildMask();
     }
     resizeLogo();
-    window.addEventListener('resize', () => { resizeLogo(); });
+    window.addEventListener('resize', resizeLogo);
 
-    logoImg.src = 'assets/logo.webp';
-    logoImg.onload = () => { logoLoaded = true; };
-
-    let maskCanvas;
     function buildMask() {
       maskCanvas = document.createElement('canvas');
       maskCanvas.width  = lW * lDpr;
@@ -144,56 +248,65 @@
       mCtx.drawImage(logoImg, 0, 0, lW, lH);
     }
 
+    logoImg.src = 'assets/logo.webp';
+    logoImg.onload = () => { logoLoaded = true; buildMask(); };
+
     function drawLogo(p) {
       lCtx.clearRect(0, 0, lW, lH);
-      if (!logoLoaded) return;
-      if (!maskCanvas) buildMask();
+      if (!logoLoaded || !maskCanvas) return;
 
-      /* CAMADA 1: fantasma (logo original bem transparente) */
+      /* Fantasma da logo (opacidade muito baixa — pré-preenchimento) */
       lCtx.save();
       lCtx.globalAlpha = 0.07;
       lCtx.drawImage(logoImg, 0, 0, lW, lH);
       lCtx.restore();
 
-      /* CAMADA 2: preenchimento da forma esquerda → direita */
+      /* Fill animado esquerda → direita — cor BRANCA */
       const fillX = lW * p;
-      const tmp   = document.createElement('canvas');
-      tmp.width   = lW * lDpr; tmp.height = lH * lDpr;
-      const tCtx  = tmp.getContext('2d');
-      tCtx.setTransform(lDpr, 0, 0, lDpr, 0, 0);
+      if (fillX > 0) {
+        const tmp  = document.createElement('canvas');
+        tmp.width  = lW * lDpr; tmp.height = lH * lDpr;
+        const tCtx = tmp.getContext('2d');
+        tCtx.setTransform(lDpr, 0, 0, lDpr, 0, 0);
 
-      tCtx.drawImage(maskCanvas, 0, 0, lW, lH);
-      tCtx.globalCompositeOperation = 'source-in';
+        tCtx.drawImage(maskCanvas, 0, 0, lW, lH);      /* máscara da logo */
+        tCtx.globalCompositeOperation = 'source-in';
+        tCtx.fillStyle = '#ffffff';                     /* puro branco */
+        tCtx.fillRect(0, 0, fillX, lH);
 
-      const fillGrad = tCtx.createLinearGradient(0, 0, lW, 0);
-      fillGrad.addColorStop(0,    '#ffffff');
-      fillGrad.addColorStop(0.45, '#c4b5fd');
-      fillGrad.addColorStop(1,    '#8B5CF6');
-      tCtx.fillStyle = fillGrad;
-      tCtx.fillRect(0, 0, fillX, lH);
-
-      lCtx.drawImage(tmp, 0, 0, lW, lH);
+        lCtx.save();
+        /* glow branco suave atrás do fill */
+        lCtx.shadowColor = 'rgba(255,255,255,.18)';
+        lCtx.shadowBlur  = 16;
+        lCtx.drawImage(tmp, 0, 0, lW, lH);
+        lCtx.restore();
+      }
 
       /* Shimmer na fronteira da onda */
-      if (p > 0.01 && p < 0.99) {
-        const shimTmp  = document.createElement('canvas');
-        shimTmp.width  = lW * lDpr; shimTmp.height = lH * lDpr;
-        const sCtx     = shimTmp.getContext('2d');
+      if (p > 0.01 && p < 0.995) {
+        const sTmp  = document.createElement('canvas');
+        sTmp.width  = lW * lDpr; sTmp.height = lH * lDpr;
+        const sCtx  = sTmp.getContext('2d');
         sCtx.setTransform(lDpr, 0, 0, lDpr, 0, 0);
         sCtx.drawImage(maskCanvas, 0, 0, lW, lH);
         sCtx.globalCompositeOperation = 'source-in';
-        const shimW  = lW * 0.06;
-        const shimX  = fillX - shimW * .5;
-        const shimGr = sCtx.createLinearGradient(shimX, 0, shimX + shimW, 0);
-        shimGr.addColorStop(0,   'rgba(255,255,255,0)');
-        shimGr.addColorStop(0.5, 'rgba(255,255,255,0.6)');
-        shimGr.addColorStop(1,   'rgba(255,255,255,0)');
-        sCtx.fillStyle = shimGr;
-        sCtx.fillRect(Math.max(0, shimX - shimW), 0, shimW * 3, lH);
-        lCtx.drawImage(shimTmp, 0, 0, lW, lH);
+        const shimW = lW * 0.048;
+        const shimX = fillX - shimW * .5;
+        const shimG = sCtx.createLinearGradient(shimX, 0, shimX + shimW, 0);
+        shimG.addColorStop(0,   'rgba(255,255,255,0)');
+        shimG.addColorStop(0.5, 'rgba(255,255,255,.9)');
+        shimG.addColorStop(1,   'rgba(255,255,255,0)');
+        sCtx.fillStyle = shimG;
+        sCtx.fillRect(Math.max(0, shimX - shimW * .5), 0, shimW * 2, lH);
+        lCtx.save();
+        lCtx.shadowColor = 'rgba(255,255,255,.5)';
+        lCtx.shadowBlur  = 10;
+        lCtx.drawImage(sTmp, 0, 0, lW, lH);
+        lCtx.restore();
       }
     }
 
+    /* ── Atualiza percentual ── */
     function updatePct(p) {
       if (pctEl) pctEl.textContent = Math.round(p * 100);
     }
@@ -205,16 +318,18 @@
       drawBg();
       drawLogo(progress);
       updatePct(progress);
+      updatePhrase(progress);
 
       if (progress >= 1) {
         drawLogo(1); updatePct(1);
-        setTimeout(dismissLoader, 480);
+        setTimeout(dismissLoader, 520);
         dismissed = true;
         return;
       }
       rafId = requestAnimationFrame(frame);
     }
 
+    /* ── Dismiss: fade-out e remove do DOM ── */
     function dismissLoader() {
       cancelAnimationFrame(rafId);
       document.body.classList.remove('loader-active');
@@ -222,6 +337,7 @@
       wrap.addEventListener('transitionend', () => wrap.remove(), { once: true });
     }
 
+    /* Segurança: máximo 7 s */
     setTimeout(() => { if (!dismissed) { dismissed = true; dismissLoader(); } }, 7000);
 
     rafId = requestAnimationFrame(frame);
