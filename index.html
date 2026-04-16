@@ -51,6 +51,15 @@
     <a href="#clients">Clientes</a>
     <a href="#team">Equipe</a>
   </nav>
+  <!-- Redes sociais no header -->
+  <div class="header-social">
+    <a href="https://www.instagram.com/esquina.online/" class="social-icon" target="_blank" rel="noopener" aria-label="Instagram da Esquina Digital">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>
+    </a>
+    <a href="https://www.linkedin.com/company/esquinaonline" class="social-icon" target="_blank" rel="noopener" aria-label="LinkedIn da Esquina Digital">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="4" ry="4"/><line x1="8" y1="11" x2="8" y2="17"/><line x1="8" y1="7" x2="8" y2="8"/><path d="M12 17v-4a2 2 0 0 1 4 0v4"/><line x1="12" y1="11" x2="12" y2="13"/></svg>
+    </a>
+  </div>
   <a href="#contact" class="btn-hire">Falar com a gente →</a>
 </header>
 
@@ -322,9 +331,9 @@
     <span class="section-label">Fale com a gente</span>
     <h2 class="section-title">Quer entender por que seus resultados não estão vindo?</h2>
     <p class="section-sub">Vamos analisar seu cenário e mostrar, com dados, onde estão os gargalos e oportunidades.</p>
-    <form class="contact-form" name="contato" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/esquinaonline/success.html">
-      <input type="hidden" name="form-name" value="contato">
-      <p hidden><label>Não preencha: <input name="bot-field"></label></p>
+    <form class="contact-form" method="POST" action="https://formspree.io/f/mvzdkrrv">
+      <input type="hidden" name="_next" value="https://esquinaonline.netlify.app/succes.html">
+      <input type="text" name="_gotcha" style="display:none">
       <div class="form-row">
         <div class="form-group"><label for="nome">Nome completo</label><input type="text" id="nome" name="nome" placeholder="Seu nome" required></div>
         <div class="form-group"><label for="tel">Telefone</label><input type="tel" id="tel" name="telefone" placeholder="(00) 00000-0000"></div>
@@ -357,6 +366,15 @@
     <a href="#team">Equipe</a>
     <a href="#contact">Contato</a>
   </nav>
+  <!-- Redes sociais no footer -->
+  <div class="footer-social">
+    <a href="https://www.instagram.com/esquina.online/" class="social-icon" target="_blank" rel="noopener" aria-label="Instagram da Esquina Digital">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>
+    </a>
+    <a href="https://www.linkedin.com/company/esquinaonline" class="social-icon" target="_blank" rel="noopener" aria-label="LinkedIn da Esquina Digital">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="4" ry="4"/><line x1="8" y1="11" x2="8" y2="17"/><line x1="8" y1="7" x2="8" y2="8"/><path d="M12 17v-4a2 2 0 0 1 4 0v4"/><line x1="12" y1="11" x2="12" y2="13"/></svg>
+    </a>
+  </div>
   <p class="footer-copy">© Esquina Digital 2026</p>
 </footer>
 
