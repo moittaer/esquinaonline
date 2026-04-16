@@ -396,6 +396,49 @@
    /PAGE LOADER
    ============================================================ */
 
+/* ============================================================
+   FORMULÁRIO DE CONTATO — envio via Formspree + redirect
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+
+  const btn = form.querySelector('button[type="submit"]');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    /* Feedback visual no botão */
+    if (btn) { btn.textContent = 'Enviando…'; btn.disabled = true; }
+
+    try {
+      const res = await fetch(form.action, {
+        method : 'POST',
+        body   : new FormData(form),
+        headers: { 'Accept': 'application/json' },
+      });
+
+      if (res.ok) {
+        /* Sucesso → redireciona para a página de obrigado */
+        window.location.href = 'succes.html';
+      } else {
+        /* Resposta de erro do Formspree */
+        const data = await res.json().catch(() => ({}));
+        const msg  = data?.errors?.map(e => e.message).join(', ')
+                     || 'Erro ao enviar. Tente novamente.';
+        alert(msg);
+        if (btn) { btn.textContent = 'Enviar'; btn.disabled = false; }
+      }
+    } catch {
+      alert('Sem conexão. Verifique sua internet e tente novamente.');
+      if (btn) { btn.textContent = 'Enviar'; btn.disabled = false; }
+    }
+  });
+});
+
+/* ============================================================
+   DEMAIS INTERAÇÕES DA PÁGINA
+   ============================================================ */
 document.addEventListener("DOMContentLoaded", () => {
 
     // 1. Cursor Customizado - Ativação Apenas para Desktop Pointers
