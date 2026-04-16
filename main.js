@@ -1,271 +1,230 @@
 /* ============================================================
-   PAGE LOADER — Rede Neural · Conectando os Pontos
+   PAGE LOADER — Logo Fill Animation + Glass Card
    ============================================================ */
 (function initLoader() {
 
   function run() {
-    const wrap    = document.getElementById('page-loader');
-    const canvas  = document.getElementById('loaderCanvas');
-    const barFill = document.getElementById('loaderBarFill');
-    const pctEl   = document.getElementById('loaderPct');
-    const logoImg = document.getElementById('loaderLogo');
-    if (!wrap || !canvas) return;
-    startLoader(wrap, canvas, barFill, pctEl, logoImg);
+    const wrap       = document.getElementById('page-loader');
+    const bgCanvas   = document.getElementById('loaderBg');
+    const logoCanvas = document.getElementById('loaderLogoCanvas');
+    const pctEl      = document.getElementById('loaderPct');
+    if (!wrap || !logoCanvas) return;
+    startLoader(wrap, bgCanvas, logoCanvas, pctEl);
   }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', run);
   } else { run(); }
 
-  /* ------------------------------------------------------------------ */
-  function startLoader(wrap, canvas, barFill, pctEl, logoImg) {
+  /* ============================================================ */
+  function startLoader(wrap, bgCanvas, logoCanvas, pctEl) {
 
     document.body.classList.add('loader-active');
 
-    const ctx = canvas.getContext('2d');
+    /* ── Progresso global (0 → 1) ── */
+    let progress  = 0;
+    let loadDone  = false;
+    let dismissed = false;
+    let rafId;
 
-    /* ── Cores monocromáticas roxas ── */
-    const VIOLET      = '139,92,246';   // #8B5CF6
-    const VIOLET_LITE = '167,139,250';  // #a78bfa
-    const WHITE       = '255,255,255';
+    const START_TIME   = performance.now();
+    const MIN_DURATION = 2400;
 
-    /* ── Dimensões (canvas cobre toda a tela) ── */
-    let W, H, dpr;
-    function resize() {
-      dpr = window.devicePixelRatio || 1;
-      W = window.innerWidth;
-      H = window.innerHeight;
-      canvas.width  = W * dpr;
-      canvas.height = H * dpr;
-      canvas.style.width  = W + 'px';
-      canvas.style.height = H + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-    resize();
-    window.addEventListener('resize', resize);
+    let browserProg = 0;
+    document.addEventListener('DOMContentLoaded', () => { browserProg = Math.max(browserProg, 0.55); });
+    window.addEventListener('load', () => { browserProg = 1; loadDone = true; });
 
-    /* ── Nós neurais ── */
-    const NODE_COUNT = 38;
-    const DOT_R      = 3;
-    const CONNECT_DIST = Math.min(W, H) * 0.26; // distância máx para ligar
+    const easeOut = t => 1 - Math.pow(1 - t, 3);
+    const lerp    = (a, b, t) => a + (b - a) * t;
 
-    /* Distribui nós: maioria espalhada, alguns próximos ao centro */
-    const nodes = Array.from({ length: NODE_COUNT }, (_, i) => {
-      /* zona: 20% centrais têm probabilidade maior de ser ancorados perto do centro */
-      const nearCenter = i < NODE_COUNT * 0.3;
-      const margin = 80;
-      return {
-        x: nearCenter
-          ? W / 2 + (Math.random() - .5) * W * .42
-          : margin + Math.random() * (W - margin * 2),
-        y: nearCenter
-          ? H / 2 + (Math.random() - .5) * H * .42
-          : margin + Math.random() * (H - margin * 2),
-        vx: (Math.random() - .5) * 0.28,
-        vy: (Math.random() - .5) * 0.28,
-        r: DOT_R + Math.random() * 1.5,
-        /* opacidade individual — começa baixa, sobe com progresso */
-        alpha: 0.12 + Math.random() * 0.18,
-        /* fator de "já apareceu" — spawn gradual no início */
-        born: Math.random(),         // normalizado 0-1; só aparece quando progress >= born
-        /* progresso de conexão de cada aresta que parte deste nó */
-        connProg: {},                 // { indexVizinho: 0→1 }
-      };
-    });
-
-    /* Pré-calcula pares de vizinhos (arestas) dentro de CONNECT_DIST */
-    /* Recalculado a cada resize mas guardado para perf */
-    let edges = [];
-    function buildEdges() {
-      edges = [];
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
-          const dist = Math.sqrt(dx*dx + dy*dy);
-          if (dist < CONNECT_DIST) {
-            edges.push({ i, j, dist,
-              /* quando este edge começa a aparecer (fração 0-1 do progresso) */
-              threshold: Math.random(),
-              /* progresso individual de desenho (0→1) */
-              drawProg: 0,
-            });
-          }
-        }
-      }
-      /* Ordena por threshold para conexão narrativa */
-      edges.sort((a, b) => a.threshold - b.threshold);
-    }
-    buildEdges();
-    window.addEventListener('resize', buildEdges);
-
-    /* ── Estado global de progresso (0 → 1) ── */
-    let progress     = 0;   // controlado por tempo + window.load
-    let loadDone     = false;
-    let dismissed    = false;
-    let rafHandle;
-
-    /* Duração mínima da animação mesmo se a página já carregou */
-    const MIN_DURATION = 2200;  // ms
-    const startTime = performance.now();
-
-    /* Rastreia progresso real do browser (ResourceTiming + DOMContentLoaded) */
-    let browserProgress = 0;
-    window.addEventListener('load', () => {
-      loadDone = true;
-      browserProgress = 1;
-    });
-    document.addEventListener('DOMContentLoaded', () => {
-      browserProgress = Math.max(browserProgress, 0.6);
-    });
-
-    /* ── Easing ── */
-    const easeOut3  = t => 1 - Math.pow(1 - t, 3);
-    const easeInOut = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
-    const lerp      = (a, b, t) => a + (b - a) * t;
-
-    /* ── Update de progresso ── */
-    function updateProgress(now) {
-      const elapsed = now - startTime;
+    function calcProgress(now) {
+      const elapsed  = now - START_TIME;
       const timeFrac = Math.min(elapsed / MIN_DURATION, 1);
-
-      /* Durante o carregamento, sobe até 90% com base no tempo */
-      const timeProgress = easeOut3(timeFrac) * (loadDone ? 1 : 0.88);
-      const target = Math.max(timeProgress, browserProgress * (loadDone ? 1 : 0.85));
-      /* Sobe suavemente, nunca desce */
-      progress = Math.min(1, Math.max(progress, lerp(progress, target, 0.04)));
+      const timeProg = easeOut(timeFrac) * (loadDone ? 1 : 0.85);
+      const target   = Math.max(timeProg, browserProg * (loadDone ? 1 : 0.8));
+      progress = Math.min(1, Math.max(progress, lerp(progress, target, 0.045)));
     }
 
-    /* ── Logo permanece sempre branca — sem alteração de cor ── */
-    function updateLogo() { /* intencional: logo é branca fixa via CSS */ }
+    /* ── Background canvas — partículas leves ── */
+    let bgW, bgH, bgDpr;
+    const bgCtx = bgCanvas ? bgCanvas.getContext('2d') : null;
+    const PARTICLES = Array.from({ length: 55 }, () => ({
+      x: Math.random(), y: Math.random(),
+      vx: (Math.random() - .5) * .00018,
+      vy: (Math.random() - .5) * .00018,
+      r: .5 + Math.random() * 1.2,
+      a: .04 + Math.random() * .09,
+    }));
+    const EDGES_BG = [];
+    for (let i = 0; i < PARTICLES.length; i++)
+      for (let j = i + 1; j < PARTICLES.length; j++)
+        if (Math.hypot(PARTICLES[i].x - PARTICLES[j].x, PARTICLES[i].y - PARTICLES[j].y) < .18)
+          EDGES_BG.push([i, j]);
 
-    /* ── Atualiza barra e percentual ── */
-    function updateBar(p) {
-      if (barFill) barFill.style.width = (p * 100).toFixed(1) + '%';
-      if (pctEl)   pctEl.textContent   = Math.round(p * 100) + '%';
+    function resizeBg() {
+      if (!bgCanvas) return;
+      bgDpr = window.devicePixelRatio || 1;
+      bgW = window.innerWidth; bgH = window.innerHeight;
+      bgCanvas.width  = bgW * bgDpr; bgCanvas.height = bgH * bgDpr;
+      bgCanvas.style.width = bgW + 'px'; bgCanvas.style.height = bgH + 'px';
+      bgCtx.setTransform(bgDpr, 0, 0, bgDpr, 0, 0);
+    }
+    resizeBg();
+    window.addEventListener('resize', resizeBg);
+
+    function drawBg() {
+      if (!bgCtx) return;
+      bgCtx.clearRect(0, 0, bgW, bgH);
+
+      const grd = bgCtx.createRadialGradient(bgW/2, bgH/2, 0, bgW/2, bgH/2, Math.max(bgW, bgH) * .55);
+      grd.addColorStop(0,   'rgba(139,92,246,.07)');
+      grd.addColorStop(.6,  'rgba(139,92,246,.02)');
+      grd.addColorStop(1,   'rgba(0,0,0,0)');
+      bgCtx.fillStyle = grd;
+      bgCtx.fillRect(0, 0, bgW, bgH);
+
+      PARTICLES.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = 1; if (p.x > 1) p.x = 0;
+        if (p.y < 0) p.y = 1; if (p.y > 1) p.y = 0;
+      });
+
+      EDGES_BG.forEach(([i, j]) => {
+        const a = PARTICLES[i], b = PARTICLES[j];
+        const dist = Math.hypot(a.x - b.x, a.y - b.y);
+        const alpha = (1 - dist / .18) * .08;
+        bgCtx.strokeStyle = `rgba(139,92,246,${alpha})`;
+        bgCtx.lineWidth   = .6;
+        bgCtx.beginPath();
+        bgCtx.moveTo(a.x * bgW, a.y * bgH);
+        bgCtx.lineTo(b.x * bgW, b.y * bgH);
+        bgCtx.stroke();
+      });
+
+      PARTICLES.forEach(p => {
+        bgCtx.fillStyle = `rgba(167,139,250,${p.a})`;
+        bgCtx.beginPath();
+        bgCtx.arc(p.x * bgW, p.y * bgH, p.r, 0, Math.PI * 2);
+        bgCtx.fill();
+      });
     }
 
-    /* ── Loop de render ── */
+    /* ── Logo canvas — fill animation ── */
+    const lCtx    = logoCanvas.getContext('2d');
+    const logoImg = new Image();
+    let logoLoaded = false;
+    let lW, lH, lDpr;
+    const LOGO_ASPECT = 1293 / 327;
+
+    function resizeLogo() {
+      lDpr = window.devicePixelRatio || 1;
+      const cardEl = wrap.querySelector('.loader-card');
+      const cardW  = cardEl ? cardEl.clientWidth - 128 : Math.min(window.innerWidth * .75, 420);
+      lW = Math.round(Math.min(cardW, 420));
+      lH = Math.round(lW / LOGO_ASPECT);
+      logoCanvas.width  = lW * lDpr;
+      logoCanvas.height = lH * lDpr;
+      logoCanvas.style.width  = lW + 'px';
+      logoCanvas.style.height = lH + 'px';
+      lCtx.setTransform(lDpr, 0, 0, lDpr, 0, 0);
+    }
+    resizeLogo();
+    window.addEventListener('resize', () => { resizeLogo(); });
+
+    logoImg.src = 'assets/logo.webp';
+    logoImg.onload = () => { logoLoaded = true; };
+
+    let maskCanvas;
+    function buildMask() {
+      maskCanvas = document.createElement('canvas');
+      maskCanvas.width  = lW * lDpr;
+      maskCanvas.height = lH * lDpr;
+      const mCtx = maskCanvas.getContext('2d');
+      mCtx.setTransform(lDpr, 0, 0, lDpr, 0, 0);
+      mCtx.drawImage(logoImg, 0, 0, lW, lH);
+    }
+
+    function drawLogo(p) {
+      lCtx.clearRect(0, 0, lW, lH);
+      if (!logoLoaded) return;
+      if (!maskCanvas) buildMask();
+
+      /* CAMADA 1: fantasma (logo original bem transparente) */
+      lCtx.save();
+      lCtx.globalAlpha = 0.07;
+      lCtx.drawImage(logoImg, 0, 0, lW, lH);
+      lCtx.restore();
+
+      /* CAMADA 2: preenchimento da forma esquerda → direita */
+      const fillX = lW * p;
+      const tmp   = document.createElement('canvas');
+      tmp.width   = lW * lDpr; tmp.height = lH * lDpr;
+      const tCtx  = tmp.getContext('2d');
+      tCtx.setTransform(lDpr, 0, 0, lDpr, 0, 0);
+
+      tCtx.drawImage(maskCanvas, 0, 0, lW, lH);
+      tCtx.globalCompositeOperation = 'source-in';
+
+      const fillGrad = tCtx.createLinearGradient(0, 0, lW, 0);
+      fillGrad.addColorStop(0,    '#ffffff');
+      fillGrad.addColorStop(0.45, '#c4b5fd');
+      fillGrad.addColorStop(1,    '#8B5CF6');
+      tCtx.fillStyle = fillGrad;
+      tCtx.fillRect(0, 0, fillX, lH);
+
+      lCtx.drawImage(tmp, 0, 0, lW, lH);
+
+      /* Shimmer na fronteira da onda */
+      if (p > 0.01 && p < 0.99) {
+        const shimTmp  = document.createElement('canvas');
+        shimTmp.width  = lW * lDpr; shimTmp.height = lH * lDpr;
+        const sCtx     = shimTmp.getContext('2d');
+        sCtx.setTransform(lDpr, 0, 0, lDpr, 0, 0);
+        sCtx.drawImage(maskCanvas, 0, 0, lW, lH);
+        sCtx.globalCompositeOperation = 'source-in';
+        const shimW  = lW * 0.06;
+        const shimX  = fillX - shimW * .5;
+        const shimGr = sCtx.createLinearGradient(shimX, 0, shimX + shimW, 0);
+        shimGr.addColorStop(0,   'rgba(255,255,255,0)');
+        shimGr.addColorStop(0.5, 'rgba(255,255,255,0.6)');
+        shimGr.addColorStop(1,   'rgba(255,255,255,0)');
+        sCtx.fillStyle = shimGr;
+        sCtx.fillRect(Math.max(0, shimX - shimW), 0, shimW * 3, lH);
+        lCtx.drawImage(shimTmp, 0, 0, lW, lH);
+      }
+    }
+
+    function updatePct(p) {
+      if (pctEl) pctEl.textContent = Math.round(p * 100);
+    }
+
+    /* ── Loop principal ── */
     function frame(now) {
       if (dismissed) return;
+      calcProgress(now);
+      drawBg();
+      drawLogo(progress);
+      updatePct(progress);
 
-      updateProgress(now);
-      updateLogo();
-      updateBar(progress);
-
-      ctx.clearRect(0, 0, W, H);
-
-      /* Fundo com vinheta sutil */
-      const vignette = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*.72);
-      vignette.addColorStop(0, 'rgba(5,5,8,0)');
-      vignette.addColorStop(1, 'rgba(0,0,10,0.55)');
-      ctx.fillStyle = vignette;
-      ctx.fillRect(0, 0, W, H);
-
-      /* Movimentação suave dos nós */
-      nodes.forEach(n => {
-        n.x += n.vx;
-        n.y += n.vy;
-        if (n.x < 40 || n.x > W - 40) n.vx *= -1;
-        if (n.y < 40 || n.y > H - 40) n.vy *= -1;
-      });
-
-      /* Atualiza progresso de cada aresta conforme o progresso global */
-      edges.forEach(e => {
-        /* A aresta só começa a aparecer quando progress > threshold */
-        const edgeProgress = Math.max(0, (progress - e.threshold * 0.8) / 0.2);
-        e.drawProg = Math.min(1, easeInOut(edgeProgress));
-      });
-
-      /* Desenha arestas */
-      edges.forEach(e => {
-        if (e.drawProg <= 0) return;
-        const a = nodes[e.i];
-        const b = nodes[e.j];
-        const pAlive = Math.min(a.alpha, b.alpha);
-        /* Opacidade da linha: mais fraca nas bordas */
-        const lineAlpha = e.drawProg * pAlive * 0.65
-                          * (1 - e.dist / CONNECT_DIST);
-
-        /* Ponto parcial para o efeito de "desenhando" */
-        const ex = a.x + (b.x - a.x) * e.drawProg;
-        const ey = a.y + (b.y - a.y) * e.drawProg;
-
-        /* Gradiente roxo com shimmer no avanço */
-        const grad = ctx.createLinearGradient(a.x, a.y, ex, ey);
-        grad.addColorStop(0,   `rgba(${VIOLET},${ lineAlpha })`);
-        grad.addColorStop(0.75,`rgba(${VIOLET_LITE},${lineAlpha * 1.35})`);
-        grad.addColorStop(1,   `rgba(${VIOLET_LITE},${e.drawProg < 1 ? lineAlpha * 1.8 : lineAlpha})`);
-
-        ctx.save();
-        if (e.drawProg < 1) {
-          ctx.shadowColor = `rgba(${VIOLET_LITE},0.6)`;
-          ctx.shadowBlur  = 6;
-        }
-        ctx.strokeStyle = grad;
-        ctx.lineWidth   = 0.85;
-        ctx.lineCap     = 'round';
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(ex, ey);
-        ctx.stroke();
-        ctx.restore();
-      });
-
-      /* Desenha nós */
-      nodes.forEach(n => {
-        /* Só aparece quando progress >= born */
-        if (progress < n.born * 0.7) return;
-        const spawnT = Math.min(1, (progress - n.born * 0.7) / 0.12);
-        const nodeAlpha = n.alpha * easeOut3(spawnT);
-
-        ctx.save();
-        ctx.shadowColor = `rgba(${VIOLET_LITE},0.8)`;
-        ctx.shadowBlur  = progress > 0.5 ? 10 : 4;
-
-        /* Preenchimento branco/roxo: vira roxo conforme progress */
-        const r = Math.round(lerp(255, 139, progress));
-        const g = Math.round(lerp(255,  92, progress));
-        const b = Math.round(lerp(255, 246, progress));
-        ctx.fillStyle = `rgba(${r},${g},${b},${nodeAlpha})`;
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        ctx.fill();
-
-        /* Halo */
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.r + 3, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(${VIOLET_LITE},${nodeAlpha * 0.4})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.restore();
-      });
-
-      /* ── Disparo do dismiss quando progresso completo ── */
-      if (progress >= 1 && !dismissed) {
-        /* Pequena pausa para o "100%" ser legível */
-        setTimeout(dismissLoader, 380);
+      if (progress >= 1) {
+        drawLogo(1); updatePct(1);
+        setTimeout(dismissLoader, 480);
         dismissed = true;
         return;
       }
-
-      rafHandle = requestAnimationFrame(frame);
+      rafId = requestAnimationFrame(frame);
     }
 
-    /* ── Dismiss ── */
     function dismissLoader() {
-      cancelAnimationFrame(rafHandle);
+      cancelAnimationFrame(rafId);
       document.body.classList.remove('loader-active');
       wrap.classList.add('loader-hidden');
       wrap.addEventListener('transitionend', () => wrap.remove(), { once: true });
     }
 
-    /* Fallback máximo 6 s */
-    setTimeout(() => {
-      if (!dismissed) { dismissed = true; dismissLoader(); }
-    }, 6000);
+    setTimeout(() => { if (!dismissed) { dismissed = true; dismissLoader(); } }, 7000);
 
-    rafHandle = requestAnimationFrame(frame);
+    rafId = requestAnimationFrame(frame);
 
   } // end startLoader
 })();

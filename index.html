@@ -18,29 +18,20 @@
 <!-- PAGE LOADER -->
 <div id="page-loader" class="loader-wrap" aria-hidden="true">
 
-  <!-- Rede neural ao fundo (canvas full-screen) -->
-  <canvas id="loaderCanvas" class="loader-canvas"></canvas>
+  <!-- Partículas de fundo (canvas full-screen) -->
+  <canvas id="loaderBg" class="loader-bg-canvas"></canvas>
 
-  <!-- Conteúdo central ancorado -->
-  <div class="loader-content">
+  <!-- Card glass centralizado -->
+  <div class="loader-card">
 
-    <!-- Logo sempre branca, tamanho grande -->
-    <div class="loader-logo-wrap">
-      <img id="loaderLogo" src="assets/logo.webp" alt="Esquina Digital" class="loader-logo-img">
+    <!-- Canvas da logo com animação de preenchimento -->
+    <div class="loader-logo-stage">
+      <canvas id="loaderLogoCanvas" class="loader-logo-canvas"></canvas>
     </div>
 
-    <!-- Tagline com destaque tipográfico -->
-    <p class="loader-tagline">Conectando os pontos</p>
-
-    <!-- Barra de progresso + label LOADING + percentual -->
-    <div class="loader-bar-wrap">
-      <div class="loader-bar-header">
-        <span class="loader-label">Loading</span>
-        <span class="loader-pct" id="loaderPct">0%</span>
-      </div>
-      <div class="loader-bar-track">
-        <div class="loader-bar-fill" id="loaderBarFill"></div>
-      </div>
+    <!-- Contador percentual -->
+    <div class="loader-pct-wrap">
+      <span class="loader-pct" id="loaderPct">0</span><span class="loader-pct-sym">%</span>
     </div>
 
   </div>
