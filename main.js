@@ -113,20 +113,19 @@
     const bgCtx = bgCanvas ? bgCanvas.getContext('2d') : null;
     let bgW, bgH, bgDpr;
 
-    /* 60 nós — rede mais densa e visível */
-    const N_COUNT = 60;
+    /* 52 nós — equilíbrio entre densidade e elegância */
+    const N_COUNT = 52;
     const nodes = Array.from({ length: N_COUNT }, () => {
-      /* velocidade base + componente aleatória → movimentos variados */
-      const speed = 0.00055 + Math.random() * 0.00065;   /* ~6-10× maior que antes */
+      /* velocidade moderada — movimento visível mas fluido */
+      const speed = 0.00018 + Math.random() * 0.00022;
       const angle = Math.random() * Math.PI * 2;
       return {
         x  : Math.random(),
         y  : Math.random(),
         vx : Math.cos(angle) * speed,
         vy : Math.sin(angle) * speed,
-        r  : 2.0 + Math.random() * 2.8,
-        a  : 0.28 + Math.random() * 0.42,
-        /* threshold individual: só conecta quando progress passar daqui */
+        r  : 1.5 + Math.random() * 2.0,
+        a  : 0.18 + Math.random() * 0.22,   /* opacidade reduzida */
         connThresh: 0.02 + Math.random() * 0.90,
       };
     });
@@ -191,14 +190,14 @@
           const key = i * 1000 + j;
           let dp = edgeState.get(key) || 0;
           /* lerp mais rápido → conexões se formam e desfazem com fluência visível */
-          dp = lerp(dp, active ? 1 : 0, active ? 0.06 : 0.035);
+          dp = lerp(dp, active ? 1 : 0, active ? 0.038 : 0.022);
 
           if (dp < 0.005) { edgeState.delete(key); continue; }
           edgeState.set(key, dp);
 
           /* alpha: depende do drawProg e da proximidade */
           const proximity = 1 - dist / EDGE_PX;
-          const alpha = dp * proximity * 0.32;   /* mais opaco que antes */
+          const alpha = dp * proximity * 0.16;   /* mais sutil */
 
           const ax = ni.x * bgW, ay = ni.y * bgH;
           const bx = nj.x * bgW, by = nj.y * bgH;
@@ -212,13 +211,13 @@
           grad.addColorStop(1, `rgba(139,92,246,${alpha})`);
 
           bgCtx.save();
-          /* Shimmer vibrante na ponta enquanto a linha está crescendo */
+          /* Shimmer suave na ponta */
           if (dp < 0.95) {
-            bgCtx.shadowColor = 'rgba(167,139,250,.7)';
-            bgCtx.shadowBlur  = 8;
+            bgCtx.shadowColor = 'rgba(167,139,250,.28)';
+            bgCtx.shadowBlur  = 4;
           }
           bgCtx.strokeStyle = grad;
-          bgCtx.lineWidth   = 0.9 + proximity * 0.5;   /* mais grossa quando próximo */
+          bgCtx.lineWidth   = 0.55 + proximity * 0.25;
           bgCtx.lineCap     = 'round';
           bgCtx.beginPath();
           bgCtx.moveTo(ax, ay);
@@ -242,9 +241,9 @@
 
         /* Ponto central com glow */
         bgCtx.save();
-        bgCtx.shadowColor = 'rgba(180,160,255,.8)';
-        bgCtx.shadowBlur  = 9;
-        bgCtx.fillStyle   = `rgba(220,208,255,${n.a})`;
+        bgCtx.shadowColor = 'rgba(180,160,255,.45)';
+        bgCtx.shadowBlur  = 6;
+        bgCtx.fillStyle   = `rgba(215,205,255,${n.a})`;
         bgCtx.beginPath();
         bgCtx.arc(nx, ny, n.r, 0, Math.PI * 2);
         bgCtx.fill();

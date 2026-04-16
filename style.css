@@ -141,16 +141,17 @@ body.loader-active { overflow: hidden; }
 /* ── Frase de etapa ── */
 .loader-phrase {
   font-family: 'DM Sans', sans-serif;
-  font-size: .76rem;
+  font-size: clamp(.58rem, 1.5vw, .72rem); /* menor para caber em 1 linha */
   font-weight: 500;
-  letter-spacing: .08em;
+  letter-spacing: .06em;
   text-transform: uppercase;
-  color: rgba(190,170,255,.62);   /* mais visível */
+  color: rgba(190,170,255,.52);
   text-align: center;
-  line-height: 1.5;
-  min-height: 1.15em;
+  line-height: 1.4;
+  white-space: nowrap;          /* força 1 linha */
+  overflow: hidden;
+  text-overflow: ellipsis;      /* segurança se ainda assim cortar */
   width: 100%;
-  /* transição mais lenta → mais confortável para leitura */
   transition: opacity .55s cubic-bezier(.4,0,.2,1),
               transform .55s cubic-bezier(.4,0,.2,1);
 }
@@ -215,10 +216,10 @@ header.scrolled { background: rgba(10,10,10,.88); backdrop-filter: blur(18px); b
 nav { display: flex; align-items: center; gap: 2rem; }
 nav a { font-size: .85rem; font-weight: 500; color: var(--g400); text-decoration: none; cursor: none; transition: color .2s; }
 nav a:hover { color: var(--white); }
-.btn-hire { font-family: var(--fd); font-size: .85rem; font-weight: 600; background: var(--orange); color: var(--white); border: none; border-radius: var(--rb); padding: .55rem 1.25rem; text-decoration: none; cursor: none; display: inline-flex; align-items: center; gap: .35rem; transition: background .2s, gap .2s; }
-.btn-hire:hover { background: var(--od); gap: .55rem; }
+.btn-hire { font-family: var(--fd); font-size: .82rem; font-weight: 600; background: var(--orange); color: var(--white); border: none; border-radius: var(--rb); padding: .5rem 1.1rem; text-decoration: none; cursor: none; display: inline-flex; align-items: center; gap: .3rem; white-space: nowrap; flex-shrink: 0; transition: background .2s, gap .2s; }
+.btn-hire:hover { background: var(--od); gap: .5rem; }
 
-/* Ícones sociais — header e footer */
+/* Ícones sociais — apenas footer */
 .social-icon {
   display: inline-flex; align-items: center; justify-content: center;
   width: 34px; height: 34px;
@@ -228,12 +229,6 @@ nav a:hover { color: var(--white); }
 }
 .social-icon:hover { color: var(--white); transform: translateY(-2px); }
 .social-icon svg { width: 18px; height: 18px; display: block; }
-
-/* Grupo de ícones no header */
-.header-social {
-  display: flex; align-items: center; gap: .25rem;
-  margin-right: .5rem;   /* espaço antes do botão CTA */
-}
 
 /* HERO */
 .hero {
