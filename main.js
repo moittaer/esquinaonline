@@ -10,6 +10,14 @@
     const pctEl      = document.getElementById('loaderPct');
     const phraseEl   = document.getElementById('loaderPhrase');
     if (!wrap || !logoCanvas) return;
+
+    /* Se o loader já foi exibido nesta sessão (ex: volta da página de sucesso),
+       remove o elemento imediatamente sem animar */
+    if (sessionStorage.getItem('loaderSeen')) {
+      wrap.remove();
+      return;
+    }
+
     startLoader(wrap, bgCanvas, logoCanvas, pctEl, phraseEl);
   }
 
@@ -380,6 +388,8 @@
       cancelAnimationFrame(rafId);
       document.body.classList.remove('loader-active');
       wrap.classList.add('loader-hidden');
+      /* Grava na sessão: loader já foi exibido uma vez */
+      sessionStorage.setItem('loaderSeen', '1');
       wrap.addEventListener('transitionend', () => wrap.remove(), { once: true });
     }
 
