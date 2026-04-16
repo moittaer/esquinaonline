@@ -46,20 +46,30 @@
       progress = Math.min(1, Math.max(progress, lerp(progress, target, 0.035)));
     }
 
-    /* ── Frases de etapa ── */
+    /* ── Frases de etapa ──
+       Distribuídas por TEMPO, não por %, para garantir que cada frase
+       seja lida mesmo quando o carregamento real voa nos primeiros %.
+       Tempo mínimo por frase: 900 ms.
+       Divisão de ~2800 ms totais em 4 slots:
+         0     → 700 ms   : "Começamos aqui"                (aparece imediatamente)
+         700   → 1500 ms  : "Aguarde enquanto conectamos…"
+         1500  → 2200 ms  : "Mapeando as possibilidades"
+         2200  → fim      : "Agora é só virar na primeira Esquina"
+    ── */
     const PHRASES = [
       'Começamos aqui',
       'Aguarde enquanto conectamos os pontos',
       'Mapeando as possibilidades',
       'Agora é só virar na primeira Esquina',
     ];
+    /* Timestamps (ms desde START_TIME) em que cada frase ENTRA */
+    const PHRASE_AT = [0, 700, 1500, 2200];
     let currentPhrase = -1;
+    let phraseTransitioning = false;   /* lock durante o cross-fade */
 
-    function updatePhrase(p) {
-      const idx = p < 0.26 ? 0 : p < 0.54 ? 1 : p < 0.80 ? 2 : 3;
-      if (idx === currentPhrase) return;
-      currentPhrase = idx;
-      if (!phraseEl) return;
+    function showPhrase(idx) {
+      if (idx === currentPhrase || phraseTransitioning || !phraseEl) return;
+      phraseTransitioning = true;
 
       phraseEl.classList.remove('phrase-in');
       phraseEl.classList.add('phrase-out');
@@ -67,9 +77,21 @@
       setTimeout(() => {
         phraseEl.textContent = PHRASES[idx];
         phraseEl.classList.remove('phrase-out');
-        void phraseEl.offsetWidth;   /* força reflow */
+        void phraseEl.offsetWidth;
         phraseEl.classList.add('phrase-in');
-      }, 480);
+        currentPhrase = idx;
+        phraseTransitioning = false;
+      }, 460);
+    }
+
+    function updatePhrase(now) {
+      const elapsed = now - START_TIME;
+      /* encontra o último slot cujo tempo já passou */
+      let idx = 0;
+      for (let i = PHRASE_AT.length - 1; i >= 0; i--) {
+        if (elapsed >= PHRASE_AT[i]) { idx = i; break; }
+      }
+      showPhrase(idx);
     }
 
     /* Primeira frase imediata */
@@ -81,38 +103,40 @@
 
     /* ════════════════════════════════════════════════════════════
        BACKGROUND — Nós neurais
-       • Desconectados no início
-       • Conexões aparecem progressivamente conforme progress sobe
+       • Nós se movem visivelmente (velocidade 6× maior)
+       • Arestas recalculadas a cada frame → conexões se formam e
+         desfazem conforme os nós se aproximam/afastam (vida real)
+       • Conexões progressivas: só aparecem se progress > threshold
+         AND distância atual < EDGE_DIST
+       • Shimmer intenso na ponta da linha sendo desenhada
     ════════════════════════════════════════════════════════════ */
     const bgCtx = bgCanvas ? bgCanvas.getContext('2d') : null;
     let bgW, bgH, bgDpr;
 
-    /* 48 nós espalhados pela tela */
-    const N_COUNT = 48;
-    const nodes = Array.from({ length: N_COUNT }, () => ({
-      x  : Math.random(),
-      y  : Math.random(),
-      vx : (Math.random() - .5) * 0.00014,
-      vy : (Math.random() - .5) * 0.00014,
-      r  : 1.6 + Math.random() * 2.4,
-      a  : 0.22 + Math.random() * 0.38,
-    }));
+    /* 60 nós — rede mais densa e visível */
+    const N_COUNT = 60;
+    const nodes = Array.from({ length: N_COUNT }, () => {
+      /* velocidade base + componente aleatória → movimentos variados */
+      const speed = 0.00055 + Math.random() * 0.00065;   /* ~6-10× maior que antes */
+      const angle = Math.random() * Math.PI * 2;
+      return {
+        x  : Math.random(),
+        y  : Math.random(),
+        vx : Math.cos(angle) * speed,
+        vy : Math.sin(angle) * speed,
+        r  : 2.0 + Math.random() * 2.8,
+        a  : 0.28 + Math.random() * 0.42,
+        /* threshold individual: só conecta quando progress passar daqui */
+        connThresh: 0.02 + Math.random() * 0.90,
+      };
+    });
 
-    /* Pré-computa arestas candidatas */
-    const EDGE_DIST = 0.195;
-    const edges = [];
-    for (let i = 0; i < N_COUNT; i++) {
-      for (let j = i + 1; j < N_COUNT; j++) {
-        const dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
-        if (dist < EDGE_DIST) {
-          edges.push({
-            i, j, dist,
-            threshold: 0.04 + Math.random() * 0.94,   /* aparece quando progress > threshold */
-            drawProg : 0,
-          });
-        }
-      }
-    }
+    /* Mapa de estados de aresta: chave "i-j" → drawProg 0→1
+       Permite que conexões existentes persistam suavemente         */
+    const edgeState = new Map();
+
+    /* Distância máxima de conexão — em px (recalcula no resize) */
+    let EDGE_PX = 180;
 
     function resizeBg() {
       if (!bgCanvas || !bgCtx) return;
@@ -121,6 +145,8 @@
       bgCanvas.width  = bgW * bgDpr; bgCanvas.height = bgH * bgDpr;
       bgCanvas.style.width = bgW + 'px'; bgCanvas.style.height = bgH + 'px';
       bgCtx.setTransform(bgDpr, 0, 0, bgDpr, 0, 0);
+      /* Distância de conexão proporcional à tela — mais generosa em desktop */
+      EDGE_PX = Math.min(bgW, bgH) * 0.24;
     }
     resizeBg();
     window.addEventListener('resize', resizeBg);
@@ -129,75 +155,96 @@
       if (!bgCtx) return;
       bgCtx.clearRect(0, 0, bgW, bgH);
 
-      /* Glow central sutil */
-      const grd = bgCtx.createRadialGradient(bgW/2, bgH/2, 0, bgW/2, bgH/2, Math.max(bgW,bgH)*.55);
-      grd.addColorStop(0,   'rgba(139,92,246,.055)');
-      grd.addColorStop(.6,  'rgba(139,92,246,.012)');
+      /* Glow central — mais pronunciado para dar profundidade */
+      const grd = bgCtx.createRadialGradient(bgW/2, bgH/2, 0, bgW/2, bgH/2, Math.max(bgW,bgH)*.6);
+      grd.addColorStop(0,   'rgba(139,92,246,.09)');
+      grd.addColorStop(.45, 'rgba(139,92,246,.03)');
       grd.addColorStop(1,   'rgba(0,0,0,0)');
       bgCtx.fillStyle = grd;
       bgCtx.fillRect(0, 0, bgW, bgH);
 
-      /* Move nós (wrap around) */
+      /* Move nós com bounce suave nas bordas (reflexão) */
       nodes.forEach(n => {
         n.x += n.vx; n.y += n.vy;
-        if (n.x < 0) n.x += 1; if (n.x > 1) n.x -= 1;
-        if (n.y < 0) n.y += 1; if (n.y > 1) n.y -= 1;
+        /* rebate na borda com pequena variação aleatória */
+        if (n.x < 0)   { n.x = 0;   n.vx =  Math.abs(n.vx) * (0.9 + Math.random() * .2); }
+        if (n.x > 1)   { n.x = 1;   n.vx = -Math.abs(n.vx) * (0.9 + Math.random() * .2); }
+        if (n.y < 0)   { n.y = 0;   n.vy =  Math.abs(n.vy) * (0.9 + Math.random() * .2); }
+        if (n.y > 1)   { n.y = 1;   n.vy = -Math.abs(n.vy) * (0.9 + Math.random() * .2); }
       });
 
-      /* Atualiza drawProg suavemente */
-      edges.forEach(e => {
-        const target = progress > e.threshold ? 1 : 0;
-        e.drawProg = lerp(e.drawProg, target, 0.025);
-      });
+      /* ── Arestas dinâmicas ──
+         A cada frame, percorre todos os pares e decide se a aresta
+         deve estar ativa (distância < EDGE_PX E progress > threshold).
+         drawProg interpola suavemente para evitar pops.             */
+      for (let i = 0; i < N_COUNT; i++) {
+        for (let j = i + 1; j < N_COUNT; j++) {
+          const ni = nodes[i], nj = nodes[j];
+          const dx = (ni.x - nj.x) * bgW;
+          const dy = (ni.y - nj.y) * bgH;
+          const dist = Math.sqrt(dx * dx + dy * dy);
 
-      /* Desenha arestas */
-      edges.forEach(e => {
-        if (e.drawProg < 0.01) return;
-        const a = nodes[e.i], b = nodes[e.j];
-        const ax = a.x * bgW, ay = a.y * bgH;
-        const bx = b.x * bgW, by = b.y * bgH;
+          /* threshold de conexão = média dos dois nós */
+          const thresh = (ni.connThresh + nj.connThresh) * 0.5;
+          const active = dist < EDGE_PX && progress > thresh;
 
-        /* Ponta da linha animada */
-        const ex = ax + (bx - ax) * e.drawProg;
-        const ey = ay + (by - ay) * e.drawProg;
+          const key = i * 1000 + j;
+          let dp = edgeState.get(key) || 0;
+          /* lerp mais rápido → conexões se formam e desfazem com fluência visível */
+          dp = lerp(dp, active ? 1 : 0, active ? 0.06 : 0.035);
 
-        const fade  = 1 - e.dist / EDGE_DIST;
-        const alpha = e.drawProg * fade * 0.20;
+          if (dp < 0.005) { edgeState.delete(key); continue; }
+          edgeState.set(key, dp);
 
-        const grad = bgCtx.createLinearGradient(ax, ay, ex, ey);
-        grad.addColorStop(0, `rgba(200,185,255,${alpha * .55})`);
-        grad.addColorStop(1, `rgba(139,92,246,${alpha})`);
+          /* alpha: depende do drawProg e da proximidade */
+          const proximity = 1 - dist / EDGE_PX;
+          const alpha = dp * proximity * 0.32;   /* mais opaco que antes */
 
-        bgCtx.save();
-        if (e.drawProg < 0.97) {
-          bgCtx.shadowColor = 'rgba(167,139,250,.45)';
-          bgCtx.shadowBlur  = 5;
+          const ax = ni.x * bgW, ay = ni.y * bgH;
+          const bx = nj.x * bgW, by = nj.y * bgH;
+
+          /* Ponta animada da linha (efeito "desenhando") */
+          const ex = ax + (bx - ax) * dp;
+          const ey = ay + (by - ay) * dp;
+
+          const grad = bgCtx.createLinearGradient(ax, ay, ex, ey);
+          grad.addColorStop(0, `rgba(200,185,255,${alpha * .5})`);
+          grad.addColorStop(1, `rgba(139,92,246,${alpha})`);
+
+          bgCtx.save();
+          /* Shimmer vibrante na ponta enquanto a linha está crescendo */
+          if (dp < 0.95) {
+            bgCtx.shadowColor = 'rgba(167,139,250,.7)';
+            bgCtx.shadowBlur  = 8;
+          }
+          bgCtx.strokeStyle = grad;
+          bgCtx.lineWidth   = 0.9 + proximity * 0.5;   /* mais grossa quando próximo */
+          bgCtx.lineCap     = 'round';
+          bgCtx.beginPath();
+          bgCtx.moveTo(ax, ay);
+          bgCtx.lineTo(ex, ey);
+          bgCtx.stroke();
+          bgCtx.restore();
         }
-        bgCtx.strokeStyle = grad;
-        bgCtx.lineWidth   = 0.7;
-        bgCtx.lineCap     = 'round';
-        bgCtx.beginPath();
-        bgCtx.moveTo(ax, ay);
-        bgCtx.lineTo(ex, ey);
-        bgCtx.stroke();
-        bgCtx.restore();
-      });
+      }
 
       /* Desenha nós */
       nodes.forEach(n => {
         const nx = n.x * bgW, ny = n.y * bgH;
 
+        /* Halo suave */
         bgCtx.save();
         bgCtx.beginPath();
-        bgCtx.arc(nx, ny, n.r + 3, 0, Math.PI * 2);
-        bgCtx.fillStyle = `rgba(139,92,246,${n.a * 0.15})`;
+        bgCtx.arc(nx, ny, n.r + 4, 0, Math.PI * 2);
+        bgCtx.fillStyle = `rgba(139,92,246,${n.a * 0.20})`;
         bgCtx.fill();
         bgCtx.restore();
 
+        /* Ponto central com glow */
         bgCtx.save();
-        bgCtx.shadowColor = 'rgba(167,139,250,.65)';
-        bgCtx.shadowBlur  = 7;
-        bgCtx.fillStyle   = `rgba(210,195,255,${n.a})`;
+        bgCtx.shadowColor = 'rgba(180,160,255,.8)';
+        bgCtx.shadowBlur  = 9;
+        bgCtx.fillStyle   = `rgba(220,208,255,${n.a})`;
         bgCtx.beginPath();
         bgCtx.arc(nx, ny, n.r, 0, Math.PI * 2);
         bgCtx.fill();
@@ -318,7 +365,7 @@
       drawBg();
       drawLogo(progress);
       updatePct(progress);
-      updatePhrase(progress);
+      updatePhrase(now);
 
       if (progress >= 1) {
         drawLogo(1); updatePct(1);
