@@ -17,18 +17,30 @@
 
 <!-- PAGE LOADER -->
 <div id="page-loader" class="loader-wrap" aria-hidden="true">
+
+  <!-- Rede neural ao fundo (canvas full-screen) -->
+  <canvas id="loaderCanvas" class="loader-canvas"></canvas>
+
+  <!-- Conteúdo central ancorado -->
   <div class="loader-content">
 
-    <!-- Logo centralizada -->
-    <div class="loader-logo">
-      <img src="assets/logo.webp" alt="Esquina Digital" width="140" height="37">
+    <!-- Logo: branca → roxa conforme carrega -->
+    <div class="loader-logo-wrap">
+      <img id="loaderLogo" src="assets/logo.webp" alt="Esquina Digital" class="loader-logo-img">
     </div>
 
-    <!-- Canvas da animação de órbita + conexão -->
-    <canvas id="loaderCanvas" class="loader-canvas"></canvas>
+    <!-- Barra de progresso -->
+    <div class="loader-bar-wrap">
+      <div class="loader-bar-track">
+        <div class="loader-bar-fill" id="loaderBarFill"></div>
+      </div>
+    </div>
 
-    <!-- Tagline que aparece na fase de conexão -->
-    <p class="loader-tagline" id="loaderTagline">Conectando os pontos</p>
+    <!-- Rodapé: tagline + percentual -->
+    <div class="loader-footer">
+      <span class="loader-tagline" id="loaderTagline">Conectando os pontos</span>
+      <span class="loader-pct" id="loaderPct">0%</span>
+    </div>
 
   </div>
 </div>
