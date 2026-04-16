@@ -136,20 +136,8 @@
       progress = Math.min(1, Math.max(progress, lerp(progress, target, 0.04)));
     }
 
-    /* ── Atualiza logo: branca → roxa via CSS filter ── */
-    function updateLogo(p) {
-      if (!logoImg) return;
-      /* p=0 → branca pura (invert 1, sem saturação roxa) */
-      /* p=1 → roxa (#8B5CF6) usando sepia+saturate+hue-rotate */
-      /* Interpolamos os parâmetros do filter */
-      const sepia      = p * 1;              // 0 → 1
-      const saturate   = 1 + p * 8;         // 1 → 9
-      const hueRotate  = p * 226;           // 0 → 226deg  (branco→roxo)
-      const brightness = 1 - p * 0.08;     // leve escurecimento no final
-      logoImg.style.filter = p < 0.02
-        ? 'brightness(0) invert(1)'
-        : `brightness(0) invert(1) sepia(${sepia.toFixed(3)}) saturate(${saturate.toFixed(2)}) hue-rotate(${hueRotate.toFixed(1)}deg) brightness(${brightness.toFixed(3)})`;
-    }
+    /* ── Logo permanece sempre branca — sem alteração de cor ── */
+    function updateLogo() { /* intencional: logo é branca fixa via CSS */ }
 
     /* ── Atualiza barra e percentual ── */
     function updateBar(p) {
@@ -162,7 +150,7 @@
       if (dismissed) return;
 
       updateProgress(now);
-      updateLogo(progress);
+      updateLogo();
       updateBar(progress);
 
       ctx.clearRect(0, 0, W, H);
