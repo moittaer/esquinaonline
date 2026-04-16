@@ -15,6 +15,25 @@
 </head>
 <body>
 
+<!-- PAGE LOADER -->
+<div id="page-loader" class="loader-wrap" aria-hidden="true">
+  <div class="loader-content">
+
+    <!-- Logo centralizada -->
+    <div class="loader-logo">
+      <img src="assets/logo.webp" alt="Esquina Digital" width="140" height="37">
+    </div>
+
+    <!-- Canvas da animação de órbita + conexão -->
+    <canvas id="loaderCanvas" class="loader-canvas"></canvas>
+
+    <!-- Tagline que aparece na fase de conexão -->
+    <p class="loader-tagline" id="loaderTagline">Conectando os pontos</p>
+
+  </div>
+</div>
+<!-- /PAGE LOADER -->
+
 <div class="cursor" id="cursor"></div>
 
 <header id="header">
@@ -334,6 +353,6 @@
   <p class="footer-copy">© Esquina Digital 2026</p>
 </footer>
 
-<script src="main.js" defer></script>
+<script src="main.js"></script>
 </body>
 </html>
