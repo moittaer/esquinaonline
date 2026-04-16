@@ -1,311 +1,283 @@
 /* ============================================================
-   PAGE LOADER — Órbita de Círculos + Conexão dos Pontos
+   PAGE LOADER — Rede Neural · Conectando os Pontos
    ============================================================ */
 (function initLoader() {
-  /* Aguarda o body estar disponível caso o script rode no <head> */
+
   function run() {
-    const loaderWrap  = document.getElementById('page-loader');
-    const canvas      = document.getElementById('loaderCanvas');
-    const tagline     = document.getElementById('loaderTagline');
-    if (!loaderWrap || !canvas) return;
-    startLoader(loaderWrap, canvas, tagline);
+    const wrap    = document.getElementById('page-loader');
+    const canvas  = document.getElementById('loaderCanvas');
+    const barFill = document.getElementById('loaderBarFill');
+    const pctEl   = document.getElementById('loaderPct');
+    const logoImg = document.getElementById('loaderLogo');
+    if (!wrap || !canvas) return;
+    startLoader(wrap, canvas, barFill, pctEl, logoImg);
   }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', run);
-  } else {
-    run();
-  }
+  } else { run(); }
 
-  function startLoader(loaderWrap, canvas, tagline) {
+  /* ------------------------------------------------------------------ */
+  function startLoader(wrap, canvas, barFill, pctEl, logoImg) {
 
-  /* -- Bloqueia scroll durante loading -- */
-  document.body.classList.add('loader-active');
+    document.body.classList.add('loader-active');
 
-  const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
 
-  /* ---------- Paleta (espelha o :root do CSS) ---------- */
-  const C = {
-    orange : '#F97316',
-    violet : '#8B5CF6',
-    pink   : '#EC4899',
-    teal   : '#4ECDC4',
-    amber  : '#F59E0B',
-    white  : '#ffffff',
-    black  : '#0a0a0a',
-  };
+    /* ── Cores monocromáticas roxas ── */
+    const VIOLET      = '139,92,246';   // #8B5CF6
+    const VIOLET_LITE = '167,139,250';  // #a78bfa
+    const WHITE       = '255,255,255';
 
-  /* ---------- Configuração do canvas ---------- */
-  const BASE = 340;           // largura de referência (px)
-  let W, H, dpr, cx, cy;
+    /* ── Dimensões (canvas cobre toda a tela) ── */
+    let W, H, dpr;
+    function resize() {
+      dpr = window.devicePixelRatio || 1;
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width  = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width  = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
 
-  function resize() {
-    dpr = window.devicePixelRatio || 1;
-    const size = Math.min(window.innerWidth * .88, BASE);
-    W = size; H = size * .52;    // proporção elíptica / perspectiva
-    canvas.width  = W * dpr;
-    canvas.height = H * dpr;
-    canvas.style.width  = W + 'px';
-    canvas.style.height = H + 'px';
-    ctx.scale(dpr, dpr);
-    cx = W / 2;
-    cy = H / 2;
-  }
-  resize();
-  window.addEventListener('resize', () => { ctx.setTransform(1,0,0,1,0,0); resize(); });
+    /* ── Nós neurais ── */
+    const NODE_COUNT = 38;
+    const DOT_R      = 3;
+    const CONNECT_DIST = Math.min(W, H) * 0.26; // distância máx para ligar
 
-  /* ---------- Definição dos círculos ---------- */
-  // Órbita elíptica: a = semi-eixo X, b = semi-eixo Y (perspectiva)
-  const ORBIT_A = W * .42;   // raio horizontal
-  const ORBIT_B = H * .38;   // raio vertical (perspectiva ~30°)
-  const N = 5;                // número de pontos
-  const COLORS = [C.orange, C.violet, C.pink, C.teal, C.amber];
-  const DOT_R  = 7;           // raio de cada círculo
+    /* Distribui nós: maioria espalhada, alguns próximos ao centro */
+    const nodes = Array.from({ length: NODE_COUNT }, (_, i) => {
+      /* zona: 20% centrais têm probabilidade maior de ser ancorados perto do centro */
+      const nearCenter = i < NODE_COUNT * 0.3;
+      const margin = 80;
+      return {
+        x: nearCenter
+          ? W / 2 + (Math.random() - .5) * W * .42
+          : margin + Math.random() * (W - margin * 2),
+        y: nearCenter
+          ? H / 2 + (Math.random() - .5) * H * .42
+          : margin + Math.random() * (H - margin * 2),
+        vx: (Math.random() - .5) * 0.28,
+        vy: (Math.random() - .5) * 0.28,
+        r: DOT_R + Math.random() * 1.5,
+        /* opacidade individual — começa baixa, sobe com progresso */
+        alpha: 0.12 + Math.random() * 0.18,
+        /* fator de "já apareceu" — spawn gradual no início */
+        born: Math.random(),         // normalizado 0-1; só aparece quando progress >= born
+        /* progresso de conexão de cada aresta que parte deste nó */
+        connProg: {},                 // { indexVizinho: 0→1 }
+      };
+    });
 
-  /* Fase 1 — ÓRBITA: círculos giram em formação, distribuídos na elipse */
-  const BASE_SPEED = 0.012;   // rad/frame
+    /* Pré-calcula pares de vizinhos (arestas) dentro de CONNECT_DIST */
+    /* Recalculado a cada resize mas guardado para perf */
+    let edges = [];
+    function buildEdges() {
+      edges = [];
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < CONNECT_DIST) {
+            edges.push({ i, j, dist,
+              /* quando este edge começa a aparecer (fração 0-1 do progresso) */
+              threshold: Math.random(),
+              /* progresso individual de desenho (0→1) */
+              drawProg: 0,
+            });
+          }
+        }
+      }
+      /* Ordena por threshold para conexão narrativa */
+      edges.sort((a, b) => a.threshold - b.threshold);
+    }
+    buildEdges();
+    window.addEventListener('resize', buildEdges);
 
-  const dots = Array.from({ length: N }, (_, i) => ({
-    angle : (i / N) * Math.PI * 2,   // ângulo inicial uniforme
-    color : COLORS[i],
-    x: 0, y: 0,                       // posição calculada frame a frame
-    // posição "destino" para a fase de conexão (calculado depois)
-    tx: 0, ty: 0,
-  }));
+    /* ── Estado global de progresso (0 → 1) ── */
+    let progress     = 0;   // controlado por tempo + window.load
+    let loadDone     = false;
+    let dismissed    = false;
+    let rafHandle;
 
-  /* ---------- Máquina de estados ---------- */
-  // PHASE: 'orbit' → 'converge' → 'connect' → 'done'
-  let phase        = 'orbit';
-  let phaseTimer   = 0;       // frames desde início da fase
+    /* Duração mínima da animação mesmo se a página já carregou */
+    const MIN_DURATION = 2200;  // ms
+    const startTime = performance.now();
 
-  // Duração de cada fase (em frames a 60 fps)
-  const DUR_ORBIT    = 90;    // ~1.5s de órbita pura
-  const DUR_CONVERGE = 55;    // ~0.9s de desaceleração + parada
-  const DUR_CONNECT  = 60;    // ~1.0s desenhando as linhas
-  const DUR_HOLD     = 30;    // ~0.5s parado após conexão
+    /* Rastreia progresso real do browser (ResourceTiming + DOMContentLoaded) */
+    let browserProgress = 0;
+    window.addEventListener('load', () => {
+      loadDone = true;
+      browserProgress = 1;
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+      browserProgress = Math.max(browserProgress, 0.6);
+    });
 
-  /* Posições finais (em polígono regular centralizado) para a conexão */
-  const POLY_R = Math.min(W, H) * .28;
-  const polyAngleOffset = -Math.PI / 2;
-  dots.forEach((d, i) => {
-    d.tx = cx + POLY_R * Math.cos(polyAngleOffset + (i / N) * Math.PI * 2);
-    d.ty = cy + POLY_R * Math.sin(polyAngleOffset + (i / N) * Math.PI * 2);
-  });
+    /* ── Easing ── */
+    const easeOut3  = t => 1 - Math.pow(1 - t, 3);
+    const easeInOut = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+    const lerp      = (a, b, t) => a + (b - a) * t;
 
-  /* Progresso de conexão de cada aresta (0→1) */
-  const EDGES = [];
-  for (let i = 0; i < N; i++) EDGES.push({ from: i, to: (i + 1) % N, prog: 0 });
+    /* ── Update de progresso ── */
+    function updateProgress(now) {
+      const elapsed = now - startTime;
+      const timeFrac = Math.min(elapsed / MIN_DURATION, 1);
 
-  /* Easing helpers */
-  const easeOut  = t => 1 - Math.pow(1 - t, 3);
-  const easeInOut= t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+      /* Durante o carregamento, sobe até 90% com base no tempo */
+      const timeProgress = easeOut3(timeFrac) * (loadDone ? 1 : 0.88);
+      const target = Math.max(timeProgress, browserProgress * (loadDone ? 1 : 0.85));
+      /* Sobe suavemente, nunca desce */
+      progress = Math.min(1, Math.max(progress, lerp(progress, target, 0.04)));
+    }
 
-  /* Posição na elipse */
-  function orbitPos(angle) {
-    return {
-      x: cx + ORBIT_A * Math.cos(angle),
-      y: cy + ORBIT_B * Math.sin(angle),
-    };
-  }
+    /* ── Atualiza logo: branca → roxa via CSS filter ── */
+    function updateLogo(p) {
+      if (!logoImg) return;
+      /* p=0 → branca pura (invert 1, sem saturação roxa) */
+      /* p=1 → roxa (#8B5CF6) usando sepia+saturate+hue-rotate */
+      /* Interpolamos os parâmetros do filter */
+      const sepia      = p * 1;              // 0 → 1
+      const saturate   = 1 + p * 8;         // 1 → 9
+      const hueRotate  = p * 226;           // 0 → 226deg  (branco→roxo)
+      const brightness = 1 - p * 0.08;     // leve escurecimento no final
+      logoImg.style.filter = p < 0.02
+        ? 'brightness(0) invert(1)'
+        : `brightness(0) invert(1) sepia(${sepia.toFixed(3)}) saturate(${saturate.toFixed(2)}) hue-rotate(${hueRotate.toFixed(1)}deg) brightness(${brightness.toFixed(3)})`;
+    }
 
-  /* ---------- Loop principal ---------- */
-  let rafHandle;
-  let startTime = null;
+    /* ── Atualiza barra e percentual ── */
+    function updateBar(p) {
+      if (barFill) barFill.style.width = (p * 100).toFixed(1) + '%';
+      if (pctEl)   pctEl.textContent   = Math.round(p * 100) + '%';
+    }
 
-  function frame(ts) {
-    if (!startTime) startTime = ts;
+    /* ── Loop de render ── */
+    function frame(now) {
+      if (dismissed) return;
 
-    ctx.clearRect(0, 0, W, H);
+      updateProgress(now);
+      updateLogo(progress);
+      updateBar(progress);
 
-    phaseTimer++;
+      ctx.clearRect(0, 0, W, H);
 
-    /* ---- PHASE: orbit ---- */
-    if (phase === 'orbit') {
-      dots.forEach(d => {
-        d.angle += BASE_SPEED;
-        const p = orbitPos(d.angle);
-        d.x = p.x; d.y = p.y;
+      /* Fundo com vinheta sutil */
+      const vignette = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*.72);
+      vignette.addColorStop(0, 'rgba(5,5,8,0)');
+      vignette.addColorStop(1, 'rgba(0,0,10,0.55)');
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, W, H);
+
+      /* Movimentação suave dos nós */
+      nodes.forEach(n => {
+        n.x += n.vx;
+        n.y += n.vy;
+        if (n.x < 40 || n.x > W - 40) n.vx *= -1;
+        if (n.y < 40 || n.y > H - 40) n.vy *= -1;
       });
 
-      drawOrbitGuide();
-      drawDots();
-
-      if (phaseTimer >= DUR_ORBIT) {
-        phase = 'converge';
-        phaseTimer = 0;
-        /* congela o ângulo de cada dot e captura posição de entrada */
-        dots.forEach(d => {
-          d.snapX = d.x;
-          d.snapY = d.y;
-        });
-      }
-    }
-
-    /* ---- PHASE: converge ---- */
-    else if (phase === 'converge') {
-      const t = easeOut(phaseTimer / DUR_CONVERGE);
-      dots.forEach(d => {
-        /* interpolação da posição snap → destino final (polígono) */
-        d.x = d.snapX + (d.tx - d.snapX) * t;
-        d.y = d.snapY + (d.ty - d.snapY) * t;
+      /* Atualiza progresso de cada aresta conforme o progresso global */
+      edges.forEach(e => {
+        /* A aresta só começa a aparecer quando progress > threshold */
+        const edgeProgress = Math.max(0, (progress - e.threshold * 0.8) / 0.2);
+        e.drawProg = Math.min(1, easeInOut(edgeProgress));
       });
 
-      /* Mostra o guia de órbita sumindo gradualmente */
-      drawOrbitGuide(1 - t);
-      drawDots();
+      /* Desenha arestas */
+      edges.forEach(e => {
+        if (e.drawProg <= 0) return;
+        const a = nodes[e.i];
+        const b = nodes[e.j];
+        const pAlive = Math.min(a.alpha, b.alpha);
+        /* Opacidade da linha: mais fraca nas bordas */
+        const lineAlpha = e.drawProg * pAlive * 0.65
+                          * (1 - e.dist / CONNECT_DIST);
 
-      if (phaseTimer >= DUR_CONVERGE) {
-        /* Garante snap exato */
-        dots.forEach(d => { d.x = d.tx; d.y = d.ty; });
-        phase = 'connect';
-        phaseTimer = 0;
-        /* Exibe a tagline */
-        if (tagline) tagline.classList.add('visible');
-      }
-    }
+        /* Ponto parcial para o efeito de "desenhando" */
+        const ex = a.x + (b.x - a.x) * e.drawProg;
+        const ey = a.y + (b.y - a.y) * e.drawProg;
 
-    /* ---- PHASE: connect ---- */
-    else if (phase === 'connect') {
-      /* Avança o progresso de cada aresta em cascata */
-      const totalEdgeFrames = DUR_CONNECT;
-      const perEdge = totalEdgeFrames / N;
-      EDGES.forEach((e, idx) => {
-        const edgeStart = idx * (perEdge * 0.55);   // ligeiro overlap
-        const local = Math.max(0, phaseTimer - edgeStart) / perEdge;
-        e.prog = Math.min(1, easeInOut(local));
+        /* Gradiente roxo com shimmer no avanço */
+        const grad = ctx.createLinearGradient(a.x, a.y, ex, ey);
+        grad.addColorStop(0,   `rgba(${VIOLET},${ lineAlpha })`);
+        grad.addColorStop(0.75,`rgba(${VIOLET_LITE},${lineAlpha * 1.35})`);
+        grad.addColorStop(1,   `rgba(${VIOLET_LITE},${e.drawProg < 1 ? lineAlpha * 1.8 : lineAlpha})`);
+
+        ctx.save();
+        if (e.drawProg < 1) {
+          ctx.shadowColor = `rgba(${VIOLET_LITE},0.6)`;
+          ctx.shadowBlur  = 6;
+        }
+        ctx.strokeStyle = grad;
+        ctx.lineWidth   = 0.85;
+        ctx.lineCap     = 'round';
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+        ctx.restore();
       });
 
-      drawConnectionLines();
-      drawDots();
+      /* Desenha nós */
+      nodes.forEach(n => {
+        /* Só aparece quando progress >= born */
+        if (progress < n.born * 0.7) return;
+        const spawnT = Math.min(1, (progress - n.born * 0.7) / 0.12);
+        const nodeAlpha = n.alpha * easeOut3(spawnT);
 
-      if (phaseTimer >= DUR_CONNECT) {
-        phase = 'hold';
-        phaseTimer = 0;
+        ctx.save();
+        ctx.shadowColor = `rgba(${VIOLET_LITE},0.8)`;
+        ctx.shadowBlur  = progress > 0.5 ? 10 : 4;
+
+        /* Preenchimento branco/roxo: vira roxo conforme progress */
+        const r = Math.round(lerp(255, 139, progress));
+        const g = Math.round(lerp(255,  92, progress));
+        const b = Math.round(lerp(255, 246, progress));
+        ctx.fillStyle = `rgba(${r},${g},${b},${nodeAlpha})`;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        /* Halo */
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r + 3, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${VIOLET_LITE},${nodeAlpha * 0.4})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      /* ── Disparo do dismiss quando progresso completo ── */
+      if (progress >= 1 && !dismissed) {
+        /* Pequena pausa para o "100%" ser legível */
+        setTimeout(dismissLoader, 380);
+        dismissed = true;
+        return;
       }
+
+      rafHandle = requestAnimationFrame(frame);
     }
 
-    /* ---- PHASE: hold ---- */
-    else if (phase === 'hold') {
-      drawConnectionLines(true);
-      drawDots();
-
-      if (phaseTimer >= DUR_HOLD) {
-        phase = 'done';
-        dismissLoader();
-        return; // para o loop
-      }
+    /* ── Dismiss ── */
+    function dismissLoader() {
+      cancelAnimationFrame(rafHandle);
+      document.body.classList.remove('loader-active');
+      wrap.classList.add('loader-hidden');
+      wrap.addEventListener('transitionend', () => wrap.remove(), { once: true });
     }
+
+    /* Fallback máximo 6 s */
+    setTimeout(() => {
+      if (!dismissed) { dismissed = true; dismissLoader(); }
+    }, 6000);
 
     rafHandle = requestAnimationFrame(frame);
-  }
-
-  /* ---------- Funções de desenho ---------- */
-
-  function drawOrbitGuide(alpha = 1) {
-    if (alpha <= 0) return;
-    ctx.save();
-    ctx.strokeStyle = `rgba(255,255,255,${0.055 * alpha})`;
-    ctx.lineWidth   = 1;
-    ctx.setLineDash([4, 6]);
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, ORBIT_A, ORBIT_B, 0, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
-  }
-
-  function drawDots() {
-    dots.forEach((d, i) => {
-      /* Sombra suave */
-      ctx.save();
-      ctx.shadowColor  = d.color;
-      ctx.shadowBlur   = 14;
-
-      /* Círculo preenchido */
-      ctx.beginPath();
-      ctx.arc(d.x, d.y, DOT_R, 0, Math.PI * 2);
-      ctx.fillStyle = d.color;
-      ctx.fill();
-
-      /* Halo externo */
-      ctx.beginPath();
-      ctx.arc(d.x, d.y, DOT_R + 3, 0, Math.PI * 2);
-      ctx.strokeStyle = `${d.color}55`;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      ctx.restore();
-    });
-  }
-
-  function drawConnectionLines(full = false) {
-    EDGES.forEach((e, idx) => {
-      const a = dots[e.from];
-      const b = dots[e.to];
-      const prog = full ? 1 : e.prog;
-      if (prog <= 0) return;
-
-      /* Ponto final parcial */
-      const ex = a.x + (b.x - a.x) * prog;
-      const ey = a.y + (b.y - a.y) * prog;
-
-      /* Gradiente de cor entre os dois dots */
-      const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-      grad.addColorStop(0, a.color);
-      grad.addColorStop(1, b.color);
-
-      ctx.save();
-      ctx.shadowColor = a.color;
-      ctx.shadowBlur  = 8;
-      ctx.strokeStyle = grad;
-      ctx.lineWidth   = 1.8;
-      ctx.lineCap     = 'round';
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      ctx.lineTo(ex, ey);
-      ctx.stroke();
-      ctx.restore();
-    });
-  }
-
-  /* ---------- Dismiss ---------- */
-  function dismissLoader() {
-    cancelAnimationFrame(rafHandle);
-    document.body.classList.remove('loader-active');
-    loaderWrap.classList.add('loader-hidden');
-    /* Remove do DOM após a transição para não pesar no acessório */
-    loaderWrap.addEventListener('transitionend', () => {
-      loaderWrap.remove();
-    }, { once: true });
-  }
-
-  /* Garante que o loader nunca bloqueie por mais de 5 s (fallback) */
-  const MAX_WAIT = 5000;
-  const fallbackTimer = setTimeout(() => {
-    if (phase !== 'done') {
-      phase = 'done';
-      cancelAnimationFrame(rafHandle);
-      dismissLoader();
-    }
-  }, MAX_WAIT);
-
-  /* Inicia o loop quando a janela estiver pronta */
-  requestAnimationFrame(frame);
-
-  /* Quando o site terminar de carregar, avança para a fase de conexão se
-     ainda estiver em órbita (assim o loader tem duração mínima de órbita
-     mas não espera indefinidamente) */
-  window.addEventListener('load', () => {
-    clearTimeout(fallbackTimer);
-    /* Deixa pelo menos DUR_ORBIT frames de órbita antes de convergir */
-    if (phase === 'orbit' && phaseTimer < DUR_ORBIT) {
-      /* Aguarda o restante dos frames e deixa o loop continuar normalmente */
-    } else if (phase === 'orbit') {
-      /* Já passou a duração mínima — avança imediatamente */
-      phaseTimer = DUR_ORBIT;
-    }
-    /* Se já está em fases posteriores, não faz nada — termina naturalmente */
-  });
 
   } // end startLoader
 })();
