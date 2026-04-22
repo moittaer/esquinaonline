@@ -11,9 +11,16 @@
     const phraseEl   = document.getElementById('loaderPhrase');
     if (!wrap || !logoCanvas) return;
 
-    /* Se o loader já foi exibido nesta sessão (ex: volta da página de sucesso),
-       remove o elemento imediatamente sem animar */
-    if (sessionStorage.getItem('loaderSeen')) {
+    /* Se o loader já foi exibido nesta sessão OU se a URL contém
+       ?skip-loader=1 (vindo da página de sucesso), remove imediatamente */
+    const skipLoader = new URLSearchParams(window.location.search).get('skip-loader') === '1';
+    if (sessionStorage.getItem('loaderSeen') || skipLoader) {
+      /* Marca como visto e limpa o parâmetro da URL sem recarregar a página */
+      sessionStorage.setItem('loaderSeen', '1');
+      if (skipLoader) {
+        const cleanUrl = window.location.pathname;
+        history.replaceState(null, '', cleanUrl);
+      }
       wrap.remove();
       return;
     }
@@ -406,7 +413,11 @@
    ============================================================ */
 
 /* ============================================================
-   FORMULÁRIO DE CONTATO — envio via Formspree + redirect
+   FORMULÁRIO DE CONTATO — Netlify Forms
+   O Netlify detecta o atributo `netlify` no <form> e processa
+   o envio nativamente, redirecionando para a action definida
+   no HTML (/succes.html). Aqui apenas adicionamos feedback
+   visual no botão enquanto o submit acontece.
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('contactForm');
@@ -414,34 +425,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const btn = form.querySelector('button[type="submit"]');
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    /* Feedback visual no botão */
+  form.addEventListener('submit', () => {
+    /* Feedback visual — o Netlify cuida do envio e do redirect */
     if (btn) { btn.textContent = 'Enviando…'; btn.disabled = true; }
-
-    try {
-      const res = await fetch(form.action, {
-        method : 'POST',
-        body   : new FormData(form),
-        headers: { 'Accept': 'application/json' },
-      });
-
-      if (res.ok) {
-        /* Sucesso → redireciona para a página de obrigado */
-        window.location.href = 'succes.html';
-      } else {
-        /* Resposta de erro do Formspree */
-        const data = await res.json().catch(() => ({}));
-        const msg  = data?.errors?.map(e => e.message).join(', ')
-                     || 'Erro ao enviar. Tente novamente.';
-        alert(msg);
-        if (btn) { btn.textContent = 'Enviar'; btn.disabled = false; }
-      }
-    } catch {
-      alert('Sem conexão. Verifique sua internet e tente novamente.');
-      if (btn) { btn.textContent = 'Enviar'; btn.disabled = false; }
-    }
   });
 });
 

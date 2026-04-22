@@ -322,8 +322,9 @@
     <span class="section-label">Fale com a gente</span>
     <h2 class="section-title">Quer entender por que seus resultados não estão vindo?</h2>
     <p class="section-sub">Vamos analisar seu cenário e mostrar, com dados, onde estão os gargalos e oportunidades.</p>
-    <form class="contact-form" id="contactForm" method="POST" action="https://formspree.io/f/mvzdkrrv">
-      <input type="text" name="_gotcha" style="display:none">
+    <form class="contact-form" id="contactForm" method="POST" name="contato" netlify netlify-honeypot="bot-field" action="/succes.html">
+      <input type="hidden" name="form-name" value="contato">
+      <p style="display:none"><label>Não preencha: <input name="bot-field"></label></p>
       <div class="form-row">
         <div class="form-group"><label for="nome">Nome completo</label><input type="text" id="nome" name="nome" placeholder="Seu nome" required></div>
         <div class="form-group"><label for="tel">Telefone</label><input type="tel" id="tel" name="telefone" placeholder="(00) 00000-0000"></div>
