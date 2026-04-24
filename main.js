@@ -436,6 +436,21 @@ document.addEventListener('DOMContentLoaded', () => {
    ============================================================ */
 document.addEventListener("DOMContentLoaded", () => {
 
+    // Lazy-load Vimeo iframe on click (thumbnail → iframe swap)
+    document.querySelectorAll('.video-trigger').forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            const videoId = trigger.dataset.vimeoId;
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://player.vimeo.com/video/${videoId}?autoplay=1&title=0&byline=0&portrait=0`;
+            iframe.setAttribute('frameborder', '0');
+            iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share');
+            iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+            iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:0;';
+            iframe.title = 'Apresentação Esquina Digital';
+            trigger.replaceWith(iframe);
+        });
+    });
+
     // 1. Animação de Blob e Transmutação do Header no Scroll Limitada (Debounce R.A.F)
     const header = document.querySelector('header');
     const blob = document.querySelector('.gradient-blob');

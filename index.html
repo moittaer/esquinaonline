@@ -75,9 +75,14 @@
       </a>
     </div>
 
-    <!-- Coluna direita: vídeo Vimeo -->
+    <!-- Coluna direita: vídeo Vimeo (lazy-load) -->
     <div class="hero-video-box">
-      <iframe src="https://player.vimeo.com/video/1186077085?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&amp;title=0&amp;byline=0&amp;portrait=0" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="VIDEO SITE ESQUINA"></iframe>
+      <button class="video-trigger" type="button" data-vimeo-id="1186077085" aria-label="Assistir apresentação Esquina Digital">
+        <img class="video-poster" src="https://i.vimeocdn.com/video/2149685254-04e05950a8e083371c97a14179785d13db5dcccf4de77a150a070efc2a8c3319-d_1920x1080?region=us" alt="" fetchpriority="high">
+        <span class="hero-video-play" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </span>
+      </button>
     </div>
 
   </div>
@@ -170,9 +175,14 @@
       </div>
     </div>
     <div class="process-cta-side">
-      <!-- Vídeo Vimeo -->
+      <!-- Vídeo Vimeo (lazy-load) -->
       <div class="process-video-box">
-        <iframe src="https://player.vimeo.com/video/1186077085?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&amp;title=0&amp;byline=0&amp;portrait=0" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="VIDEO SITE ESQUINA"></iframe>
+        <button class="video-trigger" type="button" data-vimeo-id="1186077085" aria-label="Assistir apresentação Esquina Digital">
+          <img class="video-poster" src="https://i.vimeocdn.com/video/2149685254-04e05950a8e083371c97a14179785d13db5dcccf4de77a150a070efc2a8c3319-d_1920x1080?region=us" alt="" loading="lazy">
+          <span class="process-video-play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </span>
+        </button>
       </div>
       <!-- Texto + CTA -->
       <p class="process-cta-text">Cada etapa do nosso processo é pensada para eliminar desperdício e amplificar o que funciona — com dados reais, não achismos.</p>
