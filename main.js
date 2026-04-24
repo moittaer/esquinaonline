@@ -436,21 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
    ============================================================ */
 document.addEventListener("DOMContentLoaded", () => {
 
-    // 1. Cursor Customizado - Ativação Apenas para Desktop Pointers
-    const cursor = document.getElementById('cursor');
-    if (cursor && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-        document.addEventListener('mousemove', e => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-        });
-        const hoverTargets = document.querySelectorAll('a, button, .tag, .process-video-box, .client-logo, .ctrl-btn, .c-dot');
-        hoverTargets.forEach(el => {
-            el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-            el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-        });
-    }
-
-    // 2. Animação de Blob e Transmutação do Header no Scroll Limitada (Debounce R.A.F)
+    // 1. Animação de Blob e Transmutação do Header no Scroll Limitada (Debounce R.A.F)
     const header = document.querySelector('header');
     const blob = document.querySelector('.gradient-blob');
     let isTicking = false;
