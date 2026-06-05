@@ -1,0 +1,11 @@
+[[redirects]]
+  from = "/reportmaiovilla"
+  to = "https://relatorio-villa-mai2026.vercel.app/"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/reportmaiovilla/*"
+  to = "https://relatorio-villa-mai2026.vercel.app/:splat"
+  status = 200
+  force = true
