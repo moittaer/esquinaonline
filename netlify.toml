@@ -9,3 +9,22 @@
   to = "https://relatorio-villa-mai2026.vercel.app/:splat"
   status = 200
   force = true
+
+# Assets do relatório Villa — só ativa se o arquivo não existir no Netlify
+[[redirects]]
+  from = "/css/*"
+  to = "https://relatorio-villa-mai2026.vercel.app/css/:splat"
+  status = 200
+  force = false
+
+[[redirects]]
+  from = "/js/*"
+  to = "https://relatorio-villa-mai2026.vercel.app/js/:splat"
+  status = 200
+  force = false
+
+[[redirects]]
+  from = "/assets/*"
+  to = "https://relatorio-villa-mai2026.vercel.app/assets/:splat"
+  status = 200
+  force = false
