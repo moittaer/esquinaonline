@@ -1,6 +1,11 @@
-# Relatório Bequant — proxy mantendo a URL esquina.online/reportbequant
-# Os assets são referenciados por URL absoluta do Vercel no próprio HTML,
-# então não há colisão com os assets do relatório Villa.
+# ==========================================================================
+#  RELATÓRIO BEQUANT  —  bloco exclusivo e independente
+#  URL: esquina.online/reportbequant  (a barra do navegador permanece)
+#  Proxy 200 (sem redirect visível) para o deploy do Vercel.
+#  Os assets (imagens, vídeo, css, js) são referenciados por URL ABSOLUTA
+#  do Vercel dentro do próprio HTML, então este bloco NÃO depende de
+#  nenhuma regra de /assets, /css ou /js — não colide com o Villa.
+# ==========================================================================
 [[redirects]]
   from = "/reportbequant"
   to = "https://bequant-reports-junho.vercel.app/"
@@ -13,6 +18,11 @@
   status = 200
   force = true
 
+# ==========================================================================
+#  RELATÓRIO VILLA  —  bloco original, mantido como estava
+#  Usa caminhos relativos, por isso precisa das regras de /css, /js e
+#  /assets na raiz (NÃO REMOVER: o Villa quebra sem elas).
+# ==========================================================================
 [[redirects]]
   from = "/reportmaiovilla"
   to = "https://relatorio-villa-mai2026.vercel.app/"
