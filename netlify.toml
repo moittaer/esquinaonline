@@ -1,14 +1,8 @@
 # Relatório Bequant — proxy mantendo a URL esquina.online/reportbequant
-# A barra final é forçada para que os assets relativos (assets/...) resolvam
-# sob /reportbequant/ e não colidam com os assets do relatório Villa.
+# Os assets são referenciados por URL absoluta do Vercel no próprio HTML,
+# então não há colisão com os assets do relatório Villa.
 [[redirects]]
   from = "/reportbequant"
-  to = "/reportbequant/"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/reportbequant/"
   to = "https://bequant-reports-junho.vercel.app/"
   status = 200
   force = true
