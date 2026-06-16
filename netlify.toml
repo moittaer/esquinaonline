@@ -1,3 +1,16 @@
+# Relatório Bequant — proxy mantendo a URL esquina.online/reportbequant
+[[redirects]]
+  from = "/reportbequant"
+  to = "https://bequant-reports-junho.vercel.app/"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/reportbequant/*"
+  to = "https://bequant-reports-junho.vercel.app/:splat"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/reportmaiovilla"
   to = "https://relatorio-villa-mai2026.vercel.app/"
